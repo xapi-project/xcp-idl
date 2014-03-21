@@ -13,6 +13,7 @@
  *)
 
 module StringSet = Set.Make(String)
+open Stringext
 
 (* Server configuration. We have built-in (hopefully) sensible defaults,
    together with command-line arguments and a configuration file. They
@@ -61,7 +62,7 @@ module Config_file = struct
 	let parse_line data spec =
 		let spec = List.map (fun (a, b, _, _) -> a, b) spec in
 		(* Strip comments *)
-		match Re_str.(split_delim (regexp (quote "#"))) data with
+		match String.split '#' data with
 		| [] -> ()
 		| x :: _ ->
 			begin match Re_str.bounded_split_delim (Re_str.regexp "[ \t]*=[ \t]*") x 2 with
@@ -129,15 +130,14 @@ type res = {
 let default_resources = [
 ]
 
-let colon = Re_str.regexp_string ":"
 
 let canonicalise x =
 	if not(Filename.is_relative x)
 	then x
 	else begin
 		(* Search the PATH and XCP_PATH for the executable *)
-		let paths = Re_str.split colon (Sys.getenv "PATH") in
-		let xen_paths = try Re_str.split colon (Sys.getenv "XCP_PATH") with _ -> [] in
+		let paths = String.split ':' (Sys.getenv "PATH") in
+		let xen_paths = try String.split ':' (Sys.getenv "XCP_PATH") with _ -> [] in
 		let first_hit = List.fold_left (fun found path -> match found with
 			| Some hit -> found
 			| None ->

@@ -14,6 +14,7 @@
 
 open Storage_interface
 open Storage_client
+open Stringext
 
 (* Principles:
    1. we don't delete or manipulate VDIs we didn't create
@@ -145,7 +146,7 @@ let start verbose queue sr = match queue, sr with
     let q = Client.Query.query ~dbg in
     let features = List.map (fun s ->
       try 
-	match Re_str.bounded_split (Re_str.regexp "/") s 2 with
+	match String.split ~limit:2 '/' s with
 	| [cap;vsn] -> Some (cap,Int64.of_string vsn)
 	| [cap] -> Some (cap,1L)
 	| _ -> None

@@ -21,6 +21,7 @@
 "lib/syslog_stubs.c": pkg_rpclib.syntax
 "lib/syslog_stubs.c": pkg_uri
 "lib/syslog_stubs.c": pkg_re
+"lib/syslog_stubs.c": pkg_stdext
 "lib/syslog_stubs.c": pkg_cohttp
 "lib/syslog_stubs.c": pkg_xmlm
 "lib/syslog_stubs.c": pkg_unix
@@ -40,6 +41,7 @@
 <storage/storage_test.{native,byte}>: pkg_rpclib.syntax
 <storage/storage_test.{native,byte}>: pkg_uri
 <storage/storage_test.{native,byte}>: pkg_re
+<storage/storage_test.{native,byte}>: pkg_stdext
 <storage/storage_test.{native,byte}>: pkg_cohttp
 <storage/storage_test.{native,byte}>: pkg_xmlm
 <storage/storage_test.{native,byte}>: pkg_unix
@@ -56,6 +58,7 @@
 <storage/*.ml{,i}>: pkg_rpclib.syntax
 <storage/*.ml{,i}>: pkg_uri
 <storage/*.ml{,i}>: pkg_re
+<storage/*.ml{,i}>: pkg_stdext
 <storage/*.ml{,i}>: pkg_cohttp
 <storage/*.ml{,i}>: pkg_xmlm
 <storage/*.ml{,i}>: pkg_unix
@@ -71,6 +74,7 @@
 <network/*.ml{,i}>: pkg_rpclib.syntax
 <network/*.ml{,i}>: pkg_uri
 <network/*.ml{,i}>: pkg_re
+<network/*.ml{,i}>: pkg_stdext
 <network/*.ml{,i}>: pkg_cohttp
 <network/*.ml{,i}>: pkg_xmlm
 <network/*.ml{,i}>: pkg_unix
@@ -87,6 +91,7 @@
 <rrd/*.ml{,i}>: pkg_xcp-rrd
 <rrd/*.ml{,i}>: pkg_uri
 <rrd/*.ml{,i}>: pkg_re
+<rrd/*.ml{,i}>: pkg_stdext
 <rrd/*.ml{,i}>: pkg_cohttp
 <rrd/*.ml{,i}>: pkg_xmlm
 <rrd/*.ml{,i}>: pkg_unix
@@ -102,6 +107,7 @@
 <xen/*.ml{,i}>: pkg_rpclib.syntax
 <xen/*.ml{,i}>: pkg_uri
 <xen/*.ml{,i}>: pkg_re
+<xen/*.ml{,i}>: pkg_stdext
 <xen/*.ml{,i}>: pkg_cohttp
 <xen/*.ml{,i}>: pkg_xmlm
 <xen/*.ml{,i}>: pkg_unix
@@ -117,6 +123,7 @@
 <memory/*.ml{,i}>: pkg_rpclib.syntax
 <memory/*.ml{,i}>: pkg_uri
 <memory/*.ml{,i}>: pkg_re
+<memory/*.ml{,i}>: pkg_stdext
 <memory/*.ml{,i}>: pkg_cohttp
 <memory/*.ml{,i}>: pkg_xmlm
 <memory/*.ml{,i}>: pkg_unix
@@ -134,6 +141,7 @@
 <lib/channel_helper.{native,byte}>: pkg_rpclib.syntax
 <lib/channel_helper.{native,byte}>: pkg_uri
 <lib/channel_helper.{native,byte}>: pkg_re
+<lib/channel_helper.{native,byte}>: pkg_stdext
 <lib/channel_helper.{native,byte}>: pkg_cohttp
 <lib/channel_helper.{native,byte}>: pkg_xmlm
 <lib/channel_helper.{native,byte}>: pkg_unix
@@ -150,6 +158,7 @@
 <lib/*.ml{,i}>: pkg_rpclib.syntax
 <lib/*.ml{,i}>: pkg_uri
 <lib/*.ml{,i}>: pkg_re
+<lib/*.ml{,i}>: pkg_stdext
 <lib/*.ml{,i}>: pkg_cohttp
 <lib/*.ml{,i}>: pkg_xmlm
 <lib/*.ml{,i}>: pkg_unix
@@ -168,6 +177,7 @@
 <lib_test/channel_test.{native,byte}>: pkg_rpclib.syntax
 <lib_test/channel_test.{native,byte}>: pkg_uri
 <lib_test/channel_test.{native,byte}>: pkg_re
+<lib_test/channel_test.{native,byte}>: pkg_stdext
 <lib_test/channel_test.{native,byte}>: pkg_cohttp
 <lib_test/channel_test.{native,byte}>: pkg_xmlm
 <lib_test/channel_test.{native,byte}>: pkg_unix
@@ -184,6 +194,7 @@
 <lib_test/*.ml{,i}>: pkg_rpclib.syntax
 <lib_test/*.ml{,i}>: pkg_uri
 <lib_test/*.ml{,i}>: pkg_re
+<lib_test/*.ml{,i}>: pkg_stdext
 <lib_test/*.ml{,i}>: pkg_cohttp
 <lib_test/*.ml{,i}>: pkg_xmlm
 <lib_test/*.ml{,i}>: pkg_unix

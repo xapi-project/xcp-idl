@@ -5812,6 +5812,7 @@ let setup_t =
                       bs_build_depends =
                         [
                            FindlibPackage ("uri", None);
+                           FindlibPackage ("stdext", None);
                            FindlibPackage ("re", None);
                            FindlibPackage ("cohttp", None);
                            FindlibPackage ("xmlm", None);

@@ -51,7 +51,7 @@ Library xcp_xen
   Path:               xen
   Findlibname:        xen
   Findlibparent:      xcp
-  Modules:            Xenops_interface, Xenops_client, Device_number
+  Modules:            Xenops_interface, Xenops_interface_upgrades, Xenops_client, Device_number
   BuildDepends:       xcp, threads, rpclib, rpclib.syntax
 
 Library xcp_memory

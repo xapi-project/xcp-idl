@@ -29,6 +29,8 @@ let set_sockets_dir x =
 let default_uri () = "file:" ^ !default_path
 let json_url () = Printf.sprintf "file:%s.json" !default_path
 
+let suspend_img_fmt = ref 2
+
 (* Global keys used when sending vGPU config information to xenopsd. *)
 let vgpu_pci_key = "vgpu_pci_id"
 let vgpu_config_key = "vgpu_config"
@@ -410,7 +412,7 @@ module VM = struct
 	external generate_state_string: debug_info -> Vm.t -> string = ""
 
 	external migrate: debug_info -> Vm.id -> (string * string) list -> (string * Network.t) list -> string -> Task.id = ""
-	external migrate_receive_memory: debug_info -> Vm.id -> int64 -> string -> Xcp_channel.t -> Task.id option = ""
+	external migrate_receive_memory: debug_info -> Vm.id -> int64 -> int -> string -> Xcp_channel.t -> Task.id option = ""
 
 	external create: debug_info -> Vm.id -> Task.id = ""
 	external build: debug_info -> Vm.id -> Task.id = ""

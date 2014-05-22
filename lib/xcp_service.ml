@@ -191,14 +191,21 @@ let configure ?(options=[]) ?(resources=[]) () =
 type 'a handler =
 	(string -> Rpc.call) ->
 	(Rpc.response -> string) ->
+	?rpc_upgrade_fn: (Rpc.call -> Rpc.call) ->
 	('a -> Rpc.call -> Rpc.response) ->
 	Unix.file_descr ->
 	'a->
 	unit
 
+let maybe_upgrade ?rpc_upgrade_fn call =
+	match rpc_upgrade_fn with
+	| Some f -> f call
+	| None -> call
+
+
 (* Apply a binary message framing protocol where the first 16 bytes are an integer length
    stored as an ASCII string *)
-let binary_handler call_of_string string_of_response process s context =
+let binary_handler call_of_string string_of_response ?rpc_upgrade_fn process s context =
 	let ic = Unix.in_channel_of_descr s in
 	let oc = Unix.out_channel_of_descr s in
 	(* Read a 16 byte length encoded as a string *)
@@ -208,14 +215,15 @@ let binary_handler call_of_string string_of_response process s context =
 	let msg_buf = String.make len '\000' in
 	really_input ic msg_buf 0 (String.length msg_buf);
 	let (request: Rpc.call) = call_of_string msg_buf in
-	let (result: Rpc.response) = process context request in
+	let (request': Rpc.call) = maybe_upgrade request in
+	let (result: Rpc.response) = process context request' in
 	let msg_buf = string_of_response result in
 	let len_buf = Printf.sprintf "%016d" (String.length msg_buf) in
 	output_string oc len_buf;
 	output_string oc msg_buf;
 	flush oc
 
-let http_handler call_of_string string_of_response process s =
+let http_handler call_of_string string_of_response ?rpc_upgrade_fn process s =
 	let ic = Unix.in_channel_of_descr s in
 	let oc = Unix.out_channel_of_descr s in
 	let module Request = Cohttp.Request.Make(Cohttp_posix_io.Buffered_IO) in
@@ -237,8 +245,9 @@ let http_handler call_of_string string_of_response process s =
 				let request_txt = String.make content_length '\000' in
 				really_input ic request_txt 0 content_length;
 				let rpc_call = call_of_string request_txt in
-				debug "%s" (Rpc.string_of_call rpc_call);
-				let rpc_response = process rpc_call in
+				let rpc_call' = maybe_upgrade ?rpc_upgrade_fn rpc_call in
+				debug "%s" (Rpc.string_of_call rpc_call');
+				let rpc_response = process rpc_call' in
 				debug "   %s" (Rpc.string_of_response rpc_response);
 				let response_txt = string_of_response rpc_response in
 				let content_length = String.length response_txt in
@@ -263,8 +272,8 @@ let ign_thread (t:Thread.t) = ignore t
 let ign_int (t:int)         = ignore t
 let ign_string (t:string)   = ignore t
 
-let default_raw_fn rpc_fn s =
-	http_handler Xmlrpc.call_of_string Xmlrpc.string_of_response rpc_fn s
+let default_raw_fn ?rpc_upgrade_fn rpc_fn s =
+	http_handler Xmlrpc.call_of_string Xmlrpc.string_of_response ?rpc_upgrade_fn rpc_fn s
 
 let accept_forever sock f =
 	ign_thread (Thread.create (fun () ->
@@ -313,12 +322,12 @@ let make_socket_server path fn =
 let make_queue_server name fn =
 	Queue(name, fn) (* TODO: connect to the message switch *)
 
-let make ~path ~queue_name ?raw_fn ~rpc_fn () =
+let make ~path ~queue_name ?raw_fn ?rpc_upgrade_fn ~rpc_fn () =
 	if !Xcp_client.use_switch
 	then make_queue_server queue_name rpc_fn
 	else make_socket_server path (match raw_fn with
 		| Some x -> x
-		| None -> default_raw_fn rpc_fn
+		| None -> default_raw_fn ?rpc_upgrade_fn rpc_fn
 		)
 
 let serve_forever = function

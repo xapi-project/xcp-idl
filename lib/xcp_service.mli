@@ -33,6 +33,7 @@ val make_socket_server: string -> (Unix.file_descr -> unit) -> server
 val make: path:string ->
 	queue_name:string ->
 	?raw_fn: (Unix.file_descr -> unit) ->
+	?rpc_upgrade_fn: (Rpc.call -> Rpc.call) ->
 	rpc_fn: (Rpc.call -> Rpc.response) ->
 	unit ->
 	server

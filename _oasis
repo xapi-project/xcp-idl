@@ -51,8 +51,20 @@ Library xcp_xen
   Path:               xen
   Findlibname:        xen
   Findlibparent:      xcp
-  Modules:            Xenops_interface, Xenops_client, Device_number
+  Modules:            Xenops_interface, Xenops_interface_upgrades, Xenops_client, Device_number
   BuildDepends:       xcp, threads, rpclib, rpclib.syntax
+
+Executable xenops_upgrade_test
+  CompiledObject:     best
+  Path:               xen_test
+  MainIs:             test_interface_upgrade.ml
+  Custom:             true
+  Install:            false
+  BuildDepends:       xcp, xcp.xen, threads, rpclib, oUnit
+
+Test xenops_upgrade_test
+  Command:            ./xenops_interface_upgrades_test.native
+  Run:                true
 
 Library xcp_memory
   CompiledObject:     best

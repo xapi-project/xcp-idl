@@ -195,6 +195,7 @@ module Vm = struct
 		on_reboot: action list;
 		pci_msitranslate: bool;
 		pci_power_mgmt: bool;
+		auto_update_drivers: bool;
 	} with sexp
 
 	type console_protocol =

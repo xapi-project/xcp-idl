@@ -90,3 +90,9 @@ Executable example
   Install:            false
   BuildDepends:       lwt, lwt.unix, xcp, rpclib
 
+Document xcp
+  Type:                 ocamlbuild (0.4)
+  BuildTools:           ocamldoc
+  Title:                API reference for Xcp-idl
+  XOCamlBuildPath:      .
+  XOCamlBuildLibraries: xcp, xcp.storage, xcp.network, xcp.rrd, xcp.xen, xcp.memory

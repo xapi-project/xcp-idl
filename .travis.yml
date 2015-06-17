@@ -1,6 +1,11 @@
 language: c
-install: wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-opam.sh
-script: bash -ex .travis-opam.sh
+install:
+- wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-opam.sh
+- wget https://raw.githubusercontent.com/simonjbeaumont/ocaml-travisci-skeleton/docgen/.travis-docgen.sh
+script: bash -ex .travis-opam.sh && bash -ex .travis-docgen.sh
 sudo: true
 env:
-        - OCAML_VERSION=4.02 PACKAGE=xapi-idl FORK_USER=xapi-project EXTRA_REMOTES=git://github.com/xapi-project/opam-repo-dev
+  matrix:
+  - OCAML_VERSION=4.02 PACKAGE=xapi-idl FORK_USER=xapi-project EXTRA_REMOTES=git://github.com/xapi-project/opam-repo-dev
+  global:
+    secure: KvtaGarYhfsNaiU7WstJGztY8GyDKbsibtg0EHK3p+yt7y4pmFs1ZYDwidhUojsgniKIxNbxOGKkrp3BcDVQRIgCS4Vc8X9QbPZH2B8jGSKSYg7ZPRUwK15qL3NO648sCSnbU7vkJ0D632/MDslviZACGvxBQjIWwIfUjMfFv1s=

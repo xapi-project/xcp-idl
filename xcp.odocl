@@ -1,0 +1,29 @@
+# OASIS_START
+# DO NOT EDIT (digest: 586b2857cbaf3c55190b3fb1662d99bd)
+lib/Cohttp_posix_io
+lib/Posix_channel
+lib/Open_uri
+lib/Xcp_client
+lib/Xcp_service
+lib/Xcp_channel
+lib/Xcp_channel_protocol
+lib/Syslog
+lib/Debug
+storage/Storage_interface
+storage/Vdi_automaton
+storage/Storage_client
+storage/Storage_skeleton
+storage/Storage_skeleton_test
+network/Network_interface
+network/Network_client
+network/Network_stats
+rrd/Data_source
+rrd/Ds
+rrd/Rrd_interface
+rrd/Rrd_client
+xen/Xenops_interface
+xen/Xenops_client
+xen/Device_number
+memory/Memory_interface
+memory/Memory_client
+# OASIS_STOP

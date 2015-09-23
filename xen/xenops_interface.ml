@@ -532,6 +532,8 @@ end
 
 module Host = struct
 	type cpu_info = {
+		cpu_count: int;
+		socket_count: int;
 		vendor: string;
 		speed: string;
 		modelname: string;
@@ -539,19 +541,16 @@ module Host = struct
 		model: string;
 		stepping: string;
 		flags: string;
-		features: string;
-		features_after_reboot: string;
-		physical_features: string;
-		maskable: string;
+		features: int64 array;
+		features_pv: int64 array;
+		features_hvm: int64 array;
 	}
 	type hypervisor = {
-		name: string;
 		version: string;
 		capabilities: string;
 	}
 
 	type t = {
-		nr_cpus: int;
 		cpu_info: cpu_info;
 		hypervisor: hypervisor;
 	}
@@ -576,7 +575,6 @@ module HOST = struct
 	external get_total_memory_mib: debug_info -> int64 = ""
 	external send_debug_keys: debug_info -> string -> unit = ""
 	external set_worker_pool_size: debug_info -> int -> unit = ""
-	external mask_features: debug_info -> string -> string -> string = ""
 	external update_guest_agent_features: debug_info ->
 		Host.guest_agent_feature list -> unit = ""
 end

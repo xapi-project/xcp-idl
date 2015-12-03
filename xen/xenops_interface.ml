@@ -31,6 +31,10 @@ let set_sockets_dir x =
 let default_uri () = "file:" ^ !default_path
 let json_url () = Printf.sprintf "file:%s.json" !default_path
 
+module Keys = struct
+	let vgpu_extra_args = "vgpu_extra_args"
+end
+
 type power_state =
 	| Running
 	| Halted

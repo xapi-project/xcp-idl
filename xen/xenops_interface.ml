@@ -433,6 +433,8 @@ module Vif = struct
 
 	type id = string * string
 
+	type static_ip_setting = (string * string) list
+
 	type locked_addresses = {
         	ipv4: string list;
         	ipv6: string list;
@@ -452,6 +454,7 @@ module Vif = struct
 		rate: (int64 * int64) option;
 		backend: Network.t;
 		other_config: (string * string) list;
+		static_ip_setting: static_ip_setting;
 		locking_mode: locking_mode;
 		extra_private_keys: (string * string) list;
 	}
@@ -650,6 +653,8 @@ module VIF = struct
 	external remove: debug_info -> Vif.id -> unit = ""
 	external set_carrier: debug_info -> Vif.id -> bool -> Task.id = ""
 	external set_locking_mode: debug_info -> Vif.id -> Vif.locking_mode -> Task.id = ""
+	external set_static_ip_setting: debug_info -> Vif.id -> Vif.static_ip_setting -> Task.id = ""
+	external unset_static_ip_setting: debug_info -> Vif.id -> string -> Task.id = ""
 end
 
 module VGPU = struct

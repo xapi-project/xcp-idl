@@ -47,6 +47,14 @@ val enable : ?level:Syslog.level -> string -> unit
  *  only this log level, otherwise all levels for the given [brand] are enabled.
  *  This function is idempotent. *)
 
+val set_level : ?brand:string -> Syslog.level -> unit
+(** [set_level level brand] Disable all log output from the given [brand] below [level].
+ *  This function is idempotent. *)
+
+val is_disabled : string -> Syslog.level -> bool
+(** [is_disabled brand level] returns [true] if logging for [brand] at [level] is disabled,
+ *  otherwise returns [false]. *)
+
 val disabled_modules : unit -> (string * Syslog.level) list
 (** List describing which modules have logging currently disabled *)
 

@@ -120,12 +120,15 @@ let format include_time brand priority message =
 let print_debug = ref false
 let log_to_stdout () = print_debug := true
 
-let logging_disabled_for : (string * Syslog.level) list ref = ref []
+let logging_disabled_for : (string * Syslog.level, bool) Hashtbl.t = Hashtbl.create 0
 let logging_disabled_for_m = Mutex.create ()
+
+let disabled_modules () =
+  Hashtbl.fold (fun key _ acc -> key :: acc) logging_disabled_for []
 
 let is_disabled brand level =
   Mutex.execute logging_disabled_for_m (fun () ->
-    List.mem (brand, level) !logging_disabled_for
+    Hashtbl.mem logging_disabled_for (brand, level)
   )
 
 let facility = ref Syslog.Daemon
@@ -193,14 +196,19 @@ end
 
 let all_levels = [Syslog.Debug; Syslog.Info; Syslog.Warning; Syslog.Err]
 
+let add_to_stoplist brand level =
+	Hashtbl.replace logging_disabled_for (brand, level) true
+
+let remove_from_stoplist brand level =
+	Hashtbl.remove logging_disabled_for (brand, level)
+
 let disable ?level brand =
 	let levels = match level with
 		| None -> all_levels
 		| Some l -> [l]
 	in
 	Mutex.execute logging_disabled_for_m (fun () ->
-		let disable' brand level = logging_disabled_for := (brand, level) :: !logging_disabled_for in
-		List.iter (disable' brand) levels
+		List.iter (add_to_stoplist brand) levels
 	)
 
 let enable ?level brand =
@@ -209,7 +217,22 @@ let enable ?level brand =
 		| Some l -> [l]
 	in
 	Mutex.execute logging_disabled_for_m (fun () ->
-		logging_disabled_for := List.filter (fun (x, y) -> not (x = brand && List.mem y levels)) !logging_disabled_for
+		List.iter (remove_from_stoplist brand) levels
+	)
+
+let set_level ?brand level =
+        let brands = Mutex.execute dkmutex (fun () ->
+		match brand with
+		| None -> get_all_debug_keys ()
+		| Some b -> [b])
+	in
+	Mutex.execute logging_disabled_for_m (fun () ->
+		let toggle b l = 
+			if compare level l < 0 then add_to_stoplist b l
+			else remove_from_stoplist b l
+		in
+		let set_level_for_brand b = List.iter (toggle b) all_levels 
+		in List.iter set_level_for_brand brands
 	)
 
 module type DEBUG = sig

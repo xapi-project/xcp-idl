@@ -12,6 +12,8 @@ type spec = bus_type * int * int
 (** A valid device number *)
 type t
 
+val of_rpc: Rpc.t -> t
+val rpc_of: t -> Rpc.t
 val t_of_rpc: Rpc.t -> t
 val rpc_of_t: t -> Rpc.t
 

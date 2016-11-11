@@ -1,10 +1,10 @@
 # OASIS_START
-# DO NOT EDIT (digest: 4c2fff058ec9d19d5bacfab9163ebe98)
+# DO NOT EDIT (digest: f292b73f7d9bfd57083c4d142dbc9a81)
 version = "1.2.0"
 description =
 "Interface definitions and common boilerplate for the xapi toolstack"
 requires =
-"cmdliner uri re cohttp xmlm unix sexplib sexplib.syntax rpclib rpclib.syntax rpclib.xml threads message_switch message_switch.unix fd-send-recv xcp-inventory xapi-backtrace"
+"cmdliner uri re cohttp xmlm unix ppx_sexp_conv sexplib ppx_deriving_rpc rpclib rpclib.xml threads message_switch message_switch.unix fd-send-recv xcp-inventory xapi-backtrace"
 archive(byte) = "xcp.cma"
 archive(byte, plugin) = "xcp.cma"
 archive(native) = "xcp.cmxa"
@@ -14,7 +14,7 @@ package "xen" (
  version = "1.2.0"
  description =
  "Interface definitions and common boilerplate for the xapi toolstack"
- requires = "xcp threads rpclib rpclib.syntax"
+ requires = "xcp threads ppx_deriving_rpc rpclib"
  archive(byte) = "xcp_xen.cma"
  archive(byte, plugin) = "xcp_xen.cma"
  archive(native) = "xcp_xen.cmxa"

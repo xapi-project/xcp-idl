@@ -1,4 +1,4 @@
-OASISFormat: 0.2
+OASISFormat: 0.4
 Name:        xcp-idl
 Version:     1.2.0
 Synopsis:    Interface definitions and common boilerplate for the xapi toolstack
@@ -13,7 +13,7 @@ Library xcp
   Findlibname:        xcp
   Modules:            Cohttp_posix_io, Posix_channel, Open_uri, Xcp_client, Xcp_service, Xcp_channel, Xcp_channel_protocol, Syslog, Debug
   CSources:           syslog_stubs.c
-  BuildDepends:       cmdliner, uri, re, cohttp, xmlm, unix, sexplib, sexplib.syntax, rpclib, rpclib.syntax, rpclib.xml, threads, message_switch (>= 0.11.0), message_switch.unix, fd-send-recv, xcp-inventory, xapi-backtrace
+  BuildDepends:       cmdliner, uri, re, cohttp, xmlm, unix, ppx_sexp_conv, sexplib, ppx_deriving_rpc, rpclib, rpclib.xml, threads, message_switch (>= 0.11.0), message_switch.unix, fd-send-recv, xcp-inventory, xapi-backtrace
 
 Library xcp_storage
   CompiledObject:     best
@@ -52,7 +52,7 @@ Library xcp_xen
   Findlibname:        xen
   Findlibparent:      xcp
   Modules:            Xenops_interface, Xenops_client, Device_number
-  BuildDepends:       xcp, threads, rpclib, rpclib.syntax
+  BuildDepends:       xcp, threads, ppx_deriving_rpc, rpclib
 
 Library xcp_memory
   CompiledObject:     best

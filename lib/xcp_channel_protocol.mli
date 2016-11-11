@@ -17,6 +17,6 @@ type t =
   | V4V_proxy of int * int                (** domid, port *)
   | Unix_sendmsg of int * string * string (** domid, path, token *)
 
-val rpc_of_t: t -> Rpc.t
-val t_of_rpc: Rpc.t -> t
+val rpc_of: t -> Rpc.t
+val of_rpc: Rpc.t -> t
 

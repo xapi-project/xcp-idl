@@ -46,7 +46,7 @@ module Common = struct
   let make verbose debug port =
     { verbose; debug; port }
 
-  let to_string x = Jsonrpc.to_string (rpc_of x)
+  let to_string x = Jsonrpc.to_string (rpc_of_t x)
 end
 
 let _common_options = "COMMON OPTIONS"

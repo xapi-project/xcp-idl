@@ -221,9 +221,7 @@ module Vm = struct
     pci_power_mgmt = false;
     has_vendor_device = false;
   }
-  let of_rpc rpc = Rpc.struct_extend rpc (rpc_of default_t) |> of_rpc
-  let t_of_rpc = of_rpc
-  let rpc_of_t = rpc_of
+  let t_of_rpc rpc = Rpc.struct_extend rpc (rpc_of_t default_t) |> t_of_rpc
 
   type console_protocol =
     | Rfb

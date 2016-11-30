@@ -1,10 +1,10 @@
-OASISFormat: 0.2
+OASISFormat: 0.4
 Name:        xcp-idl
 Version:     1.2.0
 Synopsis:    Interface definitions and common boilerplate for the xapi toolstack
 Authors:     David Scott
 License:     LGPL-2.1 with OCaml linking exception
-Plugins:     META (0.2)
+Plugins:     META (0.4), DevFiles (0.4)
 BuildTools:  ocamlbuild
 
 Library xcp
@@ -87,7 +87,7 @@ Executable lib_test
   BuildDepends:       lwt, lwt.unix, xcp, xcp.xen, threads, rpclib, oUnit
 
 Test lib_test
-  Command:            ./test.native
+  Command:            $lib_test
   Run:                true
 
 Executable example

@@ -82,13 +82,15 @@ Executable lib_test
   CompiledObject:     best
   Path:               lib_test
   MainIs:             test.ml
+  Build$: flag(tests)
   Custom:             true
   Install:            false
   BuildDepends:       lwt, lwt.unix, xcp, xcp.xen, threads, rpclib, oUnit
 
 Test lib_test
+  Run$: flag(tests)
+  TestTools: lib_test
   Command:            $lib_test
-  Run:                true
 
 Executable example
   CompiledObject:     best

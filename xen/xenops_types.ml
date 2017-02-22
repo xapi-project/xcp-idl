@@ -39,6 +39,11 @@ module Vgpu = struct
     config_file: string;
   } with sexp, rpc
 
+  type mxgpu = {
+    sched: int;
+    framebufferbytes: int64;
+  } with sexp, rpc
+
 end
 
 module Vm = struct

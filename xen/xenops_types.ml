@@ -40,7 +40,8 @@ module Vgpu = struct
   } with sexp, rpc
 
   type mxgpu = {
-    sched: int;
+    physical_function: Pci.address;
+    vgpus_per_pgpu: int64;
     framebufferbytes: int64;
   } with sexp, rpc
 

@@ -77,6 +77,14 @@ Library xapi_v6
   Modules:            V6_interface, V6_client
   BuildDepends:       xcp, threads, rpclib
 
+Library xcp_gpumon
+  CompiledObject:     best
+  Path:               gpumon
+  Findlibname:        gpumon
+  Findlibparent:      xcp
+  Modules:            Gpumon_interface, Gpumon_client
+  BuildDepends:       xcp, threads, rpclib
+
 Executable channel_helper
   CompiledObject:     best
   Path:               lib

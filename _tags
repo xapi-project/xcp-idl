@@ -319,6 +319,7 @@ true: annot, bin_annot
 <network/network_interface.ml{,i}>: syntax_camlp4o
 <rrd/rrd_interface.ml{,i}>: syntax_camlp4o
 <v6/v6_interface.ml>: syntax_camlp4o
+<gpumon/gpumon_interface.ml>: syntax_camlp4o
 <storage/storage_interface.ml>: pkg_rpclib.idl
 <xen/xenops_interface.ml>: pkg_rpclib.idl
 <memory/memory_interface.ml>: pkg_rpclib.idl
@@ -326,4 +327,5 @@ true: annot, bin_annot
 <rrd/data_source.ml>: pkg_rpclib.idl
 <rrd/rrd_interface.ml>: pkg_rpclib.idl
 <v6/v6_interface.ml>: pkg_rpclib.idl
+<gpumon/gpumon_interface.ml>: pkg_rpclib.idl
 <lib/xcp_channel_protocol.ml>: pkg_ppx_deriving_rpc

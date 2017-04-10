@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: d61b4e5a5c0d213787a9ffd3db8cee24)
+# DO NOT EDIT (digest: 39e3c0e07641b85855c177913b7f7bb1)
 version = "1.2.0"
 description =
 "Interface definitions and common boilerplate for the xapi toolstack"
@@ -80,6 +80,18 @@ package "memory" (
  archive(native) = "xcp_memory.cmxa"
  archive(native, plugin) = "xcp_memory.cmxs"
  exists_if = "xcp_memory.cma"
+)
+
+package "gpumon" (
+ version = "1.2.0"
+ description =
+ "Interface definitions and common boilerplate for the xapi toolstack"
+ requires = "xcp threads rpclib"
+ archive(byte) = "xcp_gpumon.cma"
+ archive(byte, plugin) = "xcp_gpumon.cma"
+ archive(native) = "xcp_gpumon.cmxa"
+ archive(native, plugin) = "xcp_gpumon.cmxs"
+ exists_if = "xcp_gpumon.cma"
 )
 # OASIS_STOP
 

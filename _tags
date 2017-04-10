@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 602453b3fb6b3d0b87012f531fd91c7d)
+# DO NOT EDIT (digest: d2e1eb170c363a619afa1e7c0eb71070)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -180,6 +180,26 @@ true: annot, bin_annot
 <v6/*.ml{,i,y}>: pkg_xcp-inventory
 <v6/*.ml{,i,y}>: pkg_xmlm
 <v6/*.ml{,i,y}>: use_xcp
+# Library xcp_gpumon
+"gpumon/xcp_gpumon.cmxs": use_xcp_gpumon
+<gpumon/*.ml{,i,y}>: pkg_cmdliner
+<gpumon/*.ml{,i,y}>: pkg_cohttp
+<gpumon/*.ml{,i,y}>: pkg_fd-send-recv
+<gpumon/*.ml{,i,y}>: pkg_message_switch
+<gpumon/*.ml{,i,y}>: pkg_message_switch.unix
+<gpumon/*.ml{,i,y}>: pkg_ppx_deriving_rpc
+<gpumon/*.ml{,i,y}>: pkg_ppx_sexp_conv
+<gpumon/*.ml{,i,y}>: pkg_re
+<gpumon/*.ml{,i,y}>: pkg_rpclib
+<gpumon/*.ml{,i,y}>: pkg_rpclib.xml
+<gpumon/*.ml{,i,y}>: pkg_sexplib
+<gpumon/*.ml{,i,y}>: pkg_threads
+<gpumon/*.ml{,i,y}>: pkg_unix
+<gpumon/*.ml{,i,y}>: pkg_uri
+<gpumon/*.ml{,i,y}>: pkg_xapi-backtrace
+<gpumon/*.ml{,i,y}>: pkg_xcp-inventory
+<gpumon/*.ml{,i,y}>: pkg_xmlm
+<gpumon/*.ml{,i,y}>: use_xcp
 # Executable channel_helper
 <lib/channel_helper.{native,byte}>: pkg_cmdliner
 <lib/channel_helper.{native,byte}>: pkg_cohttp

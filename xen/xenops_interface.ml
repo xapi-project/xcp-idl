@@ -419,6 +419,7 @@ module VM = struct
 	external set_vcpus: debug_info -> Vm.id -> int -> Task.id = ""
 	external set_shadow_multiplier : debug_info -> Vm.id -> float -> Task.id = ""
 	external set_memory_dynamic_range : debug_info -> Vm.id -> int64 -> int64 -> Task.id = ""
+	external set_auto_update_drivers: debug_info -> Vm.id -> bool -> Task.id = ""
 	external stat: debug_info -> Vm.id -> (Vm.t * Vm.state) = ""
 	external exists: debug_info -> Vm.id -> bool = ""
 	external list: debug_info -> unit -> (Vm.t * Vm.state) list = ""

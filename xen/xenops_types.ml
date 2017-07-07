@@ -186,6 +186,7 @@ module Vm = struct
     ssidref: int32;
     xsdata: (string * string) list;
     platformdata: (string * string) list;
+    templatedata: (string * string) list;
     bios_strings: (string * string) list;
     ty: builder_info;
     suppress_spurious_page_faults: bool;
@@ -210,6 +211,7 @@ module Vm = struct
     ssidref = 0l;
     xsdata = [];
     platformdata = [];
+    templatedata = [];
     bios_strings = [];
     ty = default_builder_info;
     suppress_spurious_page_faults = false;

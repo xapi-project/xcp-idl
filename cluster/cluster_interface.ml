@@ -130,7 +130,7 @@ module LocalAPI(R:RPC) = struct
       "disable"
       ["Stop the cluster on this host; leave the rest of the cluster";
        "running. The cluster can be reenabled either by restarting the";
-       "host, or by calling the `rejoin` API call."]
+       "host, or by calling the `enable` API call."]
       (unit_p @-> returning unit_p err)
 
   let enable =

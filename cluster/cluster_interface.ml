@@ -38,7 +38,7 @@ type cluster_config = {
   cluster_name : string;
   all_members : node list; (* each host can have multiple addresses *)
   enabled_members : node list;
-  is_running: bool;
+  is_enabled: bool;
   authkey: string;
 }
 [@@doc
@@ -122,14 +122,14 @@ module LocalAPI(R:RPC) = struct
   let leave = declare
       "leave"
       ["Causes this host to permanently leave the cluster, but leaves the rest of the cluster";
-       "running. This is not a temporary removal - if the admin wants the hosts to rejoin the cluster again,";
+       "enabled. This is not a temporary removal - if the admin wants the hosts to rejoin the cluster again,";
        "he will have to call `join` rather than `enable`."]
       (unit_p @-> returning unit_p err)
 
   let disable = declare
       "disable"
       ["Stop the cluster on this host; leave the rest of the cluster";
-       "running. The cluster can be reenabled either by restarting the";
+       "enabled. The cluster can be reenabled either by restarting the";
        "host, or by calling the `enable` API call."]
       (unit_p @-> returning unit_p err)
 

@@ -38,7 +38,6 @@ type cluster_config = {
   cluster_name : string;
   all_members : node list; (* each host can have multiple addresses *)
   enabled_members : node list;
-  is_enabled: bool;
   authkey: string;
 }
 [@@doc

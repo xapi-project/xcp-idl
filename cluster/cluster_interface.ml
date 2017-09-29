@@ -203,8 +203,10 @@ module RemoteAPI(R:RPC) = struct
   let rejoin =
     declare
       "rejoin"
-      ["Internal API to rejoin a member already known to a cluster."]
-      (token_p @-> nodeid_p @-> returning cluster_config_p err)
+      ["Internal API to rejoin a member already known to a cluster. The member";
+       "may want to return using a different IP address but must always return";
+       "with the same node ID."]
+      (token_p @-> nodeid_p @-> address_p @-> returning cluster_config_p err)
 
   let eject =
     let remove_p = Param.mk ~name:"remove" remove in

@@ -150,6 +150,16 @@ module LocalAPI(R:RPC) = struct
        "members."]
       (token_p @-> new_p @-> existing_p @-> returning unit_p err)
 
+  let declare_changed_addrs =
+    let changed_members_p = Param.mk ~name:"changed_members" addresslist in
+    declare
+      "declare-changed-addrs"
+      ["Declare that one or more hosts in the cluster have changed address.";
+       "Only use this command if unable to rejoin the cluster using `enable`";
+       "because the IP addresses of all nodes this node previously saw are now";
+       "invalid. If any one of these addresses remains valid on an enabled node";
+       "then this action is unnecessary."]
+      (changed_members_p @-> returning unit_p err)
 
   let declare_dead =
     let dead_members_p = Param.mk ~name:"dead_members" addresslist in

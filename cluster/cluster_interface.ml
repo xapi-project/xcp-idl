@@ -20,6 +20,7 @@ let str_of_address address = match address with IPv4 a -> a
 type addresslist = address list [@@deriving rpcty]
 
 type nodeid = int32 [@@deriving rpcty]
+type start = bool [@@deriving rpcty]
 
 let string_of_nodeid = Int32.to_string
 
@@ -227,9 +228,24 @@ module RemoteAPI(R:RPC) = struct
       (remove_p @-> token_p @-> nodeid_p @-> returning unit_p err)
 
   let config =
+    let start_p = Param.mk ~name:"start" start in
     declare
       "config"
-      ["Internal API to persist the cluster config on the host."]
-      (token_p @-> cluster_config_p @-> returning unit_p err)
+      ["Internal API to persist the cluster config on the host.";
+       "If the 'start' parameter is true, also start corosync."]
+      (token_p @-> cluster_config_p @-> start_p @-> returning unit_p err)
+
+   let ping =
+     declare
+       "ping"
+       ["Internal API to check whether xapi-clusterd and corosync are running";
+        "on the target host."]
+       (token_p @-> returning unit_p err)
+
+   let stop =
+     declare
+       "stop"
+       ["Stop corosync on the target host."]
+       (token_p @-> returning unit_p err)
 
 end

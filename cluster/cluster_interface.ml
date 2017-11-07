@@ -53,6 +53,7 @@ type cluster_config_and_all_members = cluster_config * all_members [@@deriving r
 
 type diagnostics = {
   cluster_config : cluster_config option;
+  is_enabled : bool;
   all_members : all_members option;
   node_id : nodeid option;
   token : string option;

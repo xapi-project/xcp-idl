@@ -60,6 +60,7 @@ type diagnostics = {
   token : string option;
   num_times_booted : int;
   is_quorate : bool;
+  is_running : bool;
 }
 [@@doc
  [ "This type contains diagnostic information about the current state";

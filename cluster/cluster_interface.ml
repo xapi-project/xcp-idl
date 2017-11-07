@@ -53,6 +53,7 @@ type cluster_config_and_all_members = cluster_config * all_members [@@deriving r
 
 type diagnostics = {
   live_cluster_config : cluster_config option; (* live corosync config *)
+  next_cluster_config : cluster_config option; (* next corosync config *)
   saved_cluster_config : cluster_config option; (* xapi-clusterd DB *)
   is_enabled : bool;
   all_members : all_members option;

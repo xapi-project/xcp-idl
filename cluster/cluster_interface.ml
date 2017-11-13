@@ -34,10 +34,10 @@ type node = {
    "which it can be contacted."]]
 [@@deriving rpcty]
 
+type all_members = node list [@@deriving rpcty]
 
 type cluster_config = {
   cluster_name : string;
-  all_members : node list; (* each host can have multiple addresses *)
   enabled_members : node list;
   authkey: string;
 }
@@ -49,8 +49,11 @@ type cluster_config = {
    "ensure it is kept in sync."]]
 [@@deriving rpcty]
 
+type cluster_config_and_all_members = cluster_config * all_members [@@deriving rpcty]
+
 type diagnostics = {
   cluster_config : cluster_config option;
+  all_members : all_members option;
   node_id : nodeid option;
   token : string option;
   num_times_booted : int;
@@ -203,13 +206,13 @@ module RemoteAPI(R:RPC) = struct
   let implementation = implement description
 
   let nodeid_p = Param.mk ~name:"nodeid" nodeid
-  let cluster_config_p = Param.mk ~name:"cluster_config" cluster_config
+  let cluster_config_and_all_members_p = Param.mk ~name:"cluster_config_and_all_members" cluster_config_and_all_members
 
   let join =
     declare
       "join"
       ["Internal API to join a new member to an existing cluster."]
-      (token_p @-> address_p @-> returning cluster_config_p err)
+      (token_p @-> address_p @-> returning cluster_config_and_all_members_p err)
 
   let rejoin =
     declare
@@ -217,7 +220,7 @@ module RemoteAPI(R:RPC) = struct
       ["Internal API to rejoin a member already known to a cluster. The member";
        "may want to return using a different IP address but must always return";
        "with the same node ID."]
-      (token_p @-> nodeid_p @-> address_p @-> returning cluster_config_p err)
+      (token_p @-> nodeid_p @-> address_p @-> returning cluster_config_and_all_members_p err)
 
   let eject =
     let remove_p = Param.mk ~name:"remove" remove in
@@ -233,7 +236,7 @@ module RemoteAPI(R:RPC) = struct
       "config"
       ["Internal API to persist the cluster config on the host.";
        "If the 'start' parameter is true, also start corosync."]
-      (token_p @-> cluster_config_p @-> start_p @-> returning unit_p err)
+      (token_p @-> cluster_config_and_all_members_p @-> start_p @-> returning unit_p err)
 
    let ping =
      declare

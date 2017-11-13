@@ -256,4 +256,23 @@ module RemoteAPI(R:RPC) = struct
        ["Stop corosync on the target host."]
        (token_p @-> returning unit_p err)
 
+  let config_invalidate =
+    declare
+      "config-invalidate"
+      ["Invalidate the saved corosync config. An invalid config means we";
+       "do not try to start corosync."]
+      (token_p @-> cluster_config_and_all_members_p @-> returning unit_p err)
+
+  let config_validate =
+    declare
+      "config-validate"
+      ["Validate the saved corosync config."]
+      (token_p @-> returning unit_p err)
+
+  let config_abort =
+    declare
+      "config-abort"
+      ["Revert to the previous corosync config and abandon the invalid config."]
+      (token_p @-> returning unit_p err)
+
 end

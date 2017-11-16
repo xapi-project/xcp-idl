@@ -40,6 +40,7 @@ type cluster_config = {
   cluster_name : string;
   enabled_members : node list;
   authkey: string;
+  config_version: int64;
 }
 [@@doc
   ["This type contains all of the information required to configure";

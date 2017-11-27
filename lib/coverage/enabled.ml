@@ -11,7 +11,7 @@ module Bisect = struct
     (* dump coverage information in same location as it would normally
        get dumped on exit, except also embed the jobid to make it easier to group.
        Relies on [open_temp_file] generating a unique filename given a prefix/suffix to
-       avoid clashes with filenames created atexit by bisect itself. *)
+       avoid clashes with filenames created at exit by bisect itself. *)
     let tmp, ch = Filename.open_temp_file
                     ~temp_dir:(Filename.dirname bisect_prefix)
                     (Filename.basename bisect_prefix)

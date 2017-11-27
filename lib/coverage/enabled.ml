@@ -109,8 +109,9 @@ end
  *  use [Sys.argv.(0)] for [name].
  *)
 let init name =
-  D.info "Coverage runtime initialized";
-  Bisect.init name
+  D.info "About to initialize coverage runtime";
+  Bisect.init name;
+  D.info "Coverage runtime initialized"
 
 let dispatcher_init name =
   init name;

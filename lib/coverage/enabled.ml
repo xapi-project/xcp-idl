@@ -29,8 +29,7 @@ module Bisect = struct
 
   let reset () =
     Bisect.Runtime.reset_counters ();
-    D.debug "Coverage counters reset";
-    "" (* no file produced *)
+    D.debug "Coverage counters reset"
 
   let init_env name =
     let (//)    = Filename.concat in
@@ -42,7 +41,7 @@ module Bisect = struct
 
   let process body =
     match Stringext.split ~on:' ' body with
-    | ["reset"] -> reset ()
+    | ["reset"] -> reset (); ""
     | ["dump"; jobid] -> jobid |> Int64.of_string |> dump
     | _ -> failwith body
 

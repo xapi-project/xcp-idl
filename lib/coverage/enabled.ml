@@ -6,8 +6,9 @@ module D=Debug.Make(struct let name="coverage" end)
 let prefix = "org.xen.xapi.coverage"
 
 module Bisect = struct
+  let bisect_file = "BISECT_FILE"
   let dump jobid =
-    let bisect_prefix = Unix.getenv "BISECT_FILE" in
+    let bisect_prefix = Unix.getenv bisect_file in
     (* dump coverage information in same location as it would normally
        get dumped on exit, except also embed the jobid to make it easier to group.
        Relies on [open_temp_file] generating a unique filename given a prefix/suffix to
@@ -34,10 +35,10 @@ module Bisect = struct
   let init_env name =
     let (//)    = Filename.concat in
     let tmpdir  = Filename.get_temp_dir_name () in
-    try 
-      ignore (Sys.getenv "BISECT_FILE") 
+    try
+      ignore (Sys.getenv bisect_file)
     with Not_found ->
-      Unix.putenv "BISECT_FILE" (tmpdir // Printf.sprintf "bisect-%s-" name)
+      Unix.putenv bisect_file (tmpdir // Printf.sprintf "bisect-%s-" name)
 
   let process body =
     match Stringext.split ~on:' ' body with

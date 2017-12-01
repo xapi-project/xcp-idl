@@ -10,7 +10,8 @@
 
 val init: string -> unit
 
-(** [dispatcher_init name] is like [init name] except it also initializes
- * the toplevel coverage API dispatcher on a system.
- * This is meant to be called only by XAPI *)
+(** [dispatcher_init name] only initializes the toplevel coverage API dispatcher on a system.
+ * This is meant to be called only by XAPI, which will have to call both [init]
+ * and [dispatcher_init].
+ *)
 val dispatcher_init : string -> unit

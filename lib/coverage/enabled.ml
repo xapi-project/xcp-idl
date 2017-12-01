@@ -114,5 +114,4 @@ let init name =
   D.info "Coverage runtime initialized"
 
 let dispatcher_init name =
-  init name;
   Dispatcher.init ()

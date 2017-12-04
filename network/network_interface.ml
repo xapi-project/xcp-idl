@@ -95,6 +95,25 @@ let string_of_port_kind = function
 	| Basic -> "basic"
 	| PVS_proxy -> "PVS proxy"
 
+type net_sriov_status =
+	| Enabled
+	| Disabled
+	| Enable_after_reboot
+	| Disable_after_reboot
+
+let net_sriov_status_from_string = function
+	| "enabled" -> Enabled
+	| "disabled" -> Disabled
+	| "enable_after_reboot" -> Enable_after_reboot
+	| "disable_after_reboot" -> Disable_after_reboot
+	| _ -> Disabled
+
+type net_sriov_error =
+	| Unknown
+
+let net_sriov_error_from_string = function
+	| _ -> Unknown
+
 type interface_config_t = {
 	ipv4_conf: ipv4;
 	ipv4_gateway: Unix.inet_addr option;
@@ -126,6 +145,11 @@ type config_t = {
 	bridge_config: (bridge * bridge_config_t) list;
 	gateway_interface: iface option;
 	dns_interface: iface option;
+}
+type config_sriov_result_t = {
+	device: string;
+	status: net_sriov_status;
+	error: net_sriov_error;
 }
 
 (** {2 Default configuration} *)
@@ -338,4 +362,8 @@ module PVS_proxy = struct
 	
 	external configure_site : debug_info -> PVS_proxy.t -> unit = ""
 	external remove_site : debug_info -> string -> unit = ""
+end
+
+module Net_sriov = struct
+	external exclusive_enable_by_devices : debug_info -> device:string list -> config_sriov_result_t list = ""
 end

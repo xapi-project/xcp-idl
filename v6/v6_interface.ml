@@ -16,11 +16,12 @@ open Rpc
 open Idl
 
 let service_name = "v6d"
-let queue_name = ref (Xcp_service.common_prefix ^ service_name)
+let queue_name = (Xcp_service.common_prefix ^ service_name)
 let default_sockets_dir = "/var/lib/xcp"
 let default_path = ref (Filename.concat default_sockets_dir service_name)
 let uri () = "file:" ^ !default_path
-
+let json_path = "/var/xapi/v6.json"
+let xml_path = "/var/xapi/v6"
 (* --- global types used in most API calls --- *)
 
 type debug_info = string

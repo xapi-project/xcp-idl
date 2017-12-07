@@ -36,11 +36,25 @@ type node = {
 
 type all_members = node list [@@deriving rpcty]
 
+type init_config = {
+  local_ip : address;
+  token_timeout_ms : int64 option;
+  token_coefficient_ms : int64 option;
+  name : string option;
+}
+[@@doc
+  ["This type contains all of the information required to initialise";
+   "the cluster. All optional params will have the recommended defaults";
+   "if None"]]
+[@@deriving rpcty]
+
 type cluster_config = {
   cluster_name : string;
   enabled_members : node list;
   authkey: string;
   config_version: int64;
+  cluster_token_timeout_ms : int64;
+  cluster_token_coefficient_ms : int64;
 }
 [@@doc
   ["This type contains all of the information required to configure";
@@ -90,14 +104,15 @@ let err = E.error
 type named_unit = unit [@@deriving rpcty]
 type my_string = string [@@deriving rpcty]
 
+
 let unit_p         = Param.mk ~name:"unit" ~description:["unit"] named_unit
 let string_p       = Param.mk ~name:"string" ~description:["string"] my_string
 let address_p      = Param.mk ~name:"address" ~description:[
     "IP address of a cluster member";
   ] address
-let local_ip_p     = Param.mk ~name:"local_ip" ~description:[
-    "The local address of the cluster member";
-  ] address
+let init_config_p     = Param.mk ~name:"init_config" ~description:[
+    "The initial config of the cluster member";
+  ] init_config
 
 type remove = bool [@@deriving rpcty]
 
@@ -118,10 +133,10 @@ module LocalAPI(R:RPC) = struct
 
   let create = declare
       "create"
-      ["Creates the cluster. The call takes the local IP addresses of";
+      ["Creates the cluster. The call takes the initial config of";
        "the initial host to add to the cluster. This will be the";
        "address on which the rings will be created."]
-      (local_ip_p @-> returning token_p err)
+      (init_config_p @-> returning token_p err)
 
   let destroy = declare
       "destroy"
@@ -146,9 +161,10 @@ module LocalAPI(R:RPC) = struct
     declare
       "enable"
       ["Rejoins the cluster following a call to `disable`. The parameter";
-      "passed is the new local address to use in case it changed while the";
-      "host was disabled."]
-      (local_ip_p @-> returning unit_p err)
+      "passed is the cluster config to use (optional fields set to None";
+      "unless updated) in case it changed while the host was disabled.";
+      "(Note that changing optional fields isn't yet supported, TODO)"]
+      (init_config_p @-> returning unit_p err)
 
   let join =
     let new_p = Param.mk ~name:"new_member" address in

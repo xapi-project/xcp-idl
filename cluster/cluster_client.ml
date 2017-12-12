@@ -12,4 +12,3 @@ let rpc url call =
   else json_http_rpc ~srcstr:"clusterd" ~dststr:"clusterd" url call
 
 module LocalClient = Cluster_interface.LocalAPI(Idl.GenClient ())
-module RemoteClient = Cluster_interface.RemoteAPI(Idl.GenClient ())

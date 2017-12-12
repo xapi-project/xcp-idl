@@ -7,6 +7,10 @@ let queue_name = Xcp_service.common_prefix ^ service_name
 let json_path = "/var/xapi/cluster.json"
 let xml_path = "/var/xapi/cluster"
 
+type debug_info = string
+[@@doc ["An uninterpreted string associated with the operation."]]
+[@@deriving rpcty]
+
 type cluster_name = string
 [@@doc ["Name of the cluster"]]
 [@@deriving rpcty]
@@ -114,6 +118,10 @@ let init_config_p     = Param.mk ~name:"init_config" ~description:[
     "The initial config of the cluster member";
   ] init_config
 
+let debug_info_p = Param.mk ~name:"dbg" ~description:[
+                       "An uninterpreted string to associate with the operation."
+                     ] debug_info
+
 type remove = bool [@@deriving rpcty]
 
 module LocalAPI(R:RPC) = struct
@@ -136,26 +144,26 @@ module LocalAPI(R:RPC) = struct
       ["Creates the cluster. The call takes the initial config of";
        "the initial host to add to the cluster. This will be the";
        "address on which the rings will be created."]
-      (init_config_p @-> returning token_p err)
+      (debug_info_p @-> init_config_p @-> returning token_p err)
 
   let destroy = declare
       "destroy"
       ["Destroys a created cluster"]
-      (unit_p @-> returning unit_p err)
+      (debug_info_p @-> returning unit_p err)
 
   let leave = declare
       "leave"
       ["Causes this host to permanently leave the cluster, but leaves the rest of the cluster";
        "enabled. This is not a temporary removal - if the admin wants the hosts to rejoin the cluster again,";
        "he will have to call `join` rather than `enable`."]
-      (unit_p @-> returning unit_p err)
+      (debug_info_p @-> returning unit_p err)
 
   let disable = declare
       "disable"
       ["Stop the cluster on this host; leave the rest of the cluster";
        "enabled. The cluster can be reenabled either by restarting the";
        "host, or by calling the `enable` API call."]
-      (unit_p @-> returning unit_p err)
+      (debug_info_p @-> returning unit_p err)
 
   let enable =
     declare
@@ -164,7 +172,7 @@ module LocalAPI(R:RPC) = struct
       "passed is the cluster config to use (optional fields set to None";
       "unless updated) in case it changed while the host was disabled.";
       "(Note that changing optional fields isn't yet supported, TODO)"]
-      (init_config_p @-> returning unit_p err)
+      (debug_info_p @-> init_config_p @-> returning unit_p err)
 
   let join =
     let new_p = Param.mk ~name:"new_member" address in
@@ -174,7 +182,7 @@ module LocalAPI(R:RPC) = struct
       ["Adds a node to an initialised cluster. Takes the IP address of";
        "the new member and a list of the addresses of all the existing";
        "members."]
-      (token_p @-> new_p @-> existing_p @-> returning unit_p err)
+      (debug_info_p @-> token_p @-> new_p @-> existing_p @-> returning unit_p err)
 
   let declare_changed_addrs =
     let changed_members_p = Param.mk ~name:"changed_members" addresslist in
@@ -185,7 +193,7 @@ module LocalAPI(R:RPC) = struct
        "because the IP addresses of all nodes this node previously saw are now";
        "invalid. If any one of these addresses remains valid on an enabled node";
        "then this action is unnecessary."]
-      (changed_members_p @-> returning unit_p err)
+      (debug_info_p @-> changed_members_p @-> returning unit_p err)
 
   let declare_dead =
     let dead_members_p = Param.mk ~name:"dead_members" addresslist in
@@ -195,18 +203,12 @@ module LocalAPI(R:RPC) = struct
        "the hosts from the cluster. If the hosts do attempt to rejoin the";
        "cluster in future, this may lead to fencing of other hosts and/or";
        "data loss or data corruption."]
-      (dead_members_p @-> returning unit_p err)
+      (debug_info_p @-> dead_members_p @-> returning unit_p err)
 
   let diagnostics =
     let diagnostics_p = Param.mk ~name:"diagnostics" diagnostics in
     declare
       "diagnostics"
       ["Returns diagnostic information about the cluster"]
-      (unit_p @-> returning diagnostics_p err)
-
-  (*  let node_remove = declare
-      "node_remove"
-      ["Cooperatively removes a node from the cluster"]
-      (cluster_id_p @-> address_p @-> returning unit_p err)*)
-
+      (debug_info_p @-> returning diagnostics_p err)
 end

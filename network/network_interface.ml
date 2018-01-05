@@ -13,7 +13,6 @@
  *)
 
 (** {2 Helper functions} *)
-
 let service_name = "networkd"
 let queue_name = ref (Xcp_service.common_prefix ^ service_name)
 
@@ -320,4 +319,33 @@ module PVS_proxy = struct
 	
 	external configure_site : debug_info -> PVS_proxy.t -> unit = ""
 	external remove_site : debug_info -> string -> unit = ""
+end
+
+type sriov_error =
+	| Device_not_found
+	| Bus_out_of_range
+	| Not_enough_mmio_resources
+	| Unknown of string
+ 
+type sriov_action_result =
+	| Sysfs_successful
+	| Modprobe_successful
+	| Modprobe_successful_requires_reboot
+	| Disable_successful
+ 
+type sriov_result =
+	| Ok of sriov_action_result
+	| Error of sriov_error
+ 
+module Sriov = struct
+
+	type sriov_pci_t = {
+		mac: string option;
+		vlan: int64 option;
+		rate: int64 option;
+	}
+
+	external enable:  debug_info -> name:iface -> sriov_result  = ""
+	external disable: debug_info -> name:iface -> sriov_result  = ""
+	external make_vf_config : debug_info -> pci_address:Xcp_pci.address -> vf_info:Sriov.sriov_pci_t -> unit = ""
 end

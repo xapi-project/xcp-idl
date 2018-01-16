@@ -19,14 +19,12 @@ open Rpc
 open Idl
 
 let service_name = "v6d"
-let queue_name = (Xcp_service.common_prefix ^ service_name)
+let queue_name = ref (Xcp_service.common_prefix ^ service_name)
 let default_sockets_dir = "/var/lib/xcp"
 let default_path = ref (Filename.concat default_sockets_dir service_name)
 let uri () = "file:" ^ !default_path
 let json_path = "/var/xapi/v6.json"
 let xml_path = "/var/xapi/v6"
-
-(* --- global types used in most API calls --- *)
 
 (** Uninterpreted/sanitised string associated with operation *)
 type debug_info = string
@@ -35,15 +33,15 @@ type debug_info = string
 (** Record representing software edition *)
 type edition =
   {
-    ed_title : string ;
+    title : string ;
     (** Name of edition, this will be passed to apply_edition *)
-    ed_official_title : string ;
+    official_title : string ;
     (** Marketing title used to advertise edition *)
-    ed_code : string ;
+    code : string ;
     (** Abbreviated form of name, used to show up in logs and on command line *)
-    ed_order : int ;
-    (** Number indicating ordering among other editions
-        with low numbers corresponding to editions with fewer features, and vice versa *)
+    order : int ;
+    (** Number indicating ordering among other editions;
+        low numbers correspond to fewer features, and vice versa *)
   }
 [@@deriving rpcty]
 
@@ -66,15 +64,14 @@ type edition_info =
 [@@deriving rpcty]
 
 (** [string * string] list *)
-type stringPairLst = (string * string) list
+type string_pair_lst = (string * string) list
 [@@deriving rpcty]
 
-(* --- errors wrapped in generic errors type --- *)
-
-(** Wrapper for specific licensing errors *)
+(** Wrapper for specific errors in managing features *)
 type errors =
   | Invalid_edition of string
-  (** Thrown by apply_edition on receiving unfamiliar edition. Note: get_editions returns list of all valid editions *)
+  (** Thrown by apply_edition on receiving unfamiliar edition.
+   *  Note: get_editions returns list of all valid editions *)
   | License_expired
   (** Thrown by license_check when expiry date matches or precedes current date *)
   | License_processing_error
@@ -84,24 +81,24 @@ type errors =
   | Missing_connection_details
   (** Thrown if connection port or address parameter not supplied to check_license *)
   | V6d_failure
-  (** Licensing daemon failed *)
+  (** Daemon failed to enable features *)
 [@@default V6d_failure]
 [@@deriving rpcty]
-(* --- API interface --- *)
 
-(** Generic licensing error of error variant type *)
-exception LicensingError of errors
+(** Pass error variant as exn for error handler *)
+exception V6_error of errors
 [@@deriving rpcty]
 
 (** handle exception generation and raising *)
 let err = Error.{
     def = errors;
     raiser = (function
-        | e -> raise (LicensingError e));
+        | e -> raise (V6_error e));
     matcher = (function
-      | LicensingError e -> Some e
+      | V6_error e -> Some e
       | _ -> None)
   }
+
 
 (** functor to autogenerate code using PPX *)
 module RPC_API(R : RPC) = struct
@@ -111,10 +108,11 @@ module RPC_API(R : RPC) = struct
   let description = Interface.{
       name = "Licensing";
       namespace = None;
-      description = [
-        "This interface is used by Xapi and V6d to manage ";
-        "XenServer edition licensing of hosts.";
-      ];
+      description =
+        [
+          "This interface is used by Xapi and V6d to manage "
+        ; "enabling and disabling features."
+        ];
       version=(1,0,0);        }
 
   (* define implementation *)
@@ -130,9 +128,9 @@ module RPC_API(R : RPC) = struct
   let apply_edition =
     let edition_p = Param.mk ~description:["Edition title"] Types.string in
     let edition_info_p = Param.mk ~description:["Edition info"] edition_info in
-    let current_params_p = Param.mk ~description:["Xapi paramaters"] stringPairLst in
+    let current_params_p = Param.mk ~description:["Xapi parameters"] string_pair_lst in
     declare "apply_edition"
-      ["Checks license info and ensures provided features are compatible."]
+      ["Checks license info to ensures enabled features are compatible."]
       ( debug_info_p @-> edition_p @-> current_params_p @-> returning edition_info_p err )
 
   let get_editions =

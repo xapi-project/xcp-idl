@@ -322,16 +322,15 @@ module PVS_proxy = struct
 end
 
 type sriov_error =
-	| Device_not_found
-	| Bus_out_of_range
-	| Not_enough_mmio_resources
-	| Unknown of string
+	| Msg of string
+	| Config_vf_rate_not_supported
  
 type sriov_action_result =
 	| Sysfs_successful
 	| Modprobe_successful
 	| Modprobe_successful_requires_reboot
 	| Disable_successful
+	| Make_vf_config_succuessful
  
 type sriov_result =
 	| Ok of sriov_action_result
@@ -347,5 +346,5 @@ module Sriov = struct
 
 	external enable:  debug_info -> name:iface -> sriov_result  = ""
 	external disable: debug_info -> name:iface -> sriov_result  = ""
-	external make_vf_config : debug_info -> pci_address:Xcp_pci.address -> vf_info:Sriov.sriov_pci_t -> unit = ""
+	external make_vf_config : debug_info -> pci_address:Xcp_pci.address -> vf_info:Sriov.sriov_pci_t -> sriov_result = ""
 end

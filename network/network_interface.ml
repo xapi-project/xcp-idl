@@ -247,6 +247,7 @@ module Interface = struct
 	external get_all : debug_info -> unit -> iface list = ""
 	external exists : debug_info -> name:iface -> bool = ""
 	external get_mac : debug_info -> name:iface -> string = ""
+	external get_pci_bus_path : debug_info -> name:iface -> string = ""
 	external is_up : debug_info -> name:iface -> bool = ""
 	external get_ipv4_addr : debug_info -> name:iface -> (Unix.inet_addr * int) list = ""
 	external set_ipv4_conf : debug_info -> name:iface -> conf:ipv4 -> unit = ""

@@ -35,7 +35,7 @@ let xml_url () = "file:" ^ xml_path
 
 let rpc call =
 		if !use_switch
-		then json_switch_rpc queue_name call
+		then json_switch_rpc !queue_name call
 		else xml_http_rpc ~srcstr:"xapi" ~dststr:"v6d" xml_url call
 
 module Client = V6_interface.RPC_API(Idl.GenClientExnRpc(struct let rpc=rpc end))

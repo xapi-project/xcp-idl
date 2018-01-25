@@ -16,7 +16,7 @@ type cluster_name = string
 [@@deriving rpcty]
 
 type address = IPv4 of string
-[@doc ["An IP address"]]
+[@doc ["An IPv4 address (a.b.c.d)"]]
 [@@deriving rpcty]
 let printaddr () = function | IPv4 s -> Printf.sprintf "IPv4(%s)" s
 let str_of_address address = match address with IPv4 a -> a
@@ -34,7 +34,7 @@ type node = {
 }
 [@@doc
   ["This type describes an individual node in the cluster. It must have";
-   "a unique identity (an int32), and may have multiple IP addresses on";
+   "a unique identity (an int32), and may have multiple IPv4 addresses on";
    "which it can be contacted."]]
 [@@deriving rpcty]
 
@@ -112,7 +112,7 @@ type my_string = string [@@deriving rpcty]
 let unit_p         = Param.mk ~name:"unit" ~description:["unit"] named_unit
 let string_p       = Param.mk ~name:"string" ~description:["string"] my_string
 let address_p      = Param.mk ~name:"address" ~description:[
-    "IP address of a cluster member";
+    "IPv4 address of a cluster member";
   ] address
 let init_config_p     = Param.mk ~name:"init_config" ~description:[
     "The initial config of the cluster member";
@@ -179,7 +179,7 @@ module LocalAPI(R:RPC) = struct
     let existing_p = Param.mk ~name:"existing_members" addresslist in
     declare
       "join"
-      ["Adds a node to an initialised cluster. Takes the IP address of";
+      ["Adds a node to an initialised cluster. Takes the IPv4 address of";
        "the new member and a list of the addresses of all the existing";
        "members."]
       (debug_info_p @-> token_p @-> new_p @-> existing_p @-> returning unit_p err)
@@ -190,7 +190,7 @@ module LocalAPI(R:RPC) = struct
       "declare-changed-addrs"
       ["Declare that one or more hosts in the cluster have changed address.";
        "Only use this command if unable to rejoin the cluster using `enable`";
-       "because the IP addresses of all nodes this node previously saw are now";
+       "because the IPv4 addresses of all nodes this node previously saw are now";
        "invalid. If any one of these addresses remains valid on an enabled node";
        "then this action is unnecessary."]
       (debug_info_p @-> changed_members_p @-> returning unit_p err)

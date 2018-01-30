@@ -5,7 +5,6 @@ open Idl
 let service_name = "cluster"
 let queue_name = Xcp_service.common_prefix ^ service_name
 let json_path = "/var/xapi/cluster.json"
-let xml_path = "/var/xapi/cluster"
 
 type debug_info = string
 [@@doc ["An uninterpreted string associated with the operation."]]

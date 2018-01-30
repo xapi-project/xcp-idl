@@ -1,6 +1,6 @@
 (* Cluster CLI *)
 
-open Interface
+open Cluster_interface
 
 module Cmds = LocalAPI(Cmdlinergen.Gen ())
 
@@ -16,7 +16,7 @@ let default_cmd =
   Cmdliner.Term.info "cluster_cli" ~version:(version_str Cmds.description) ~doc
 
 let cli () =
-  let rpc = Client.rpc Client.json_url in
+  let rpc = Cluster_client.rpc Cluster_client.json_url in
   Cmdliner.Term.eval_choice default_cmd (List.map (fun t -> t rpc) (Cmds.implementation ()))
 
 let _ = cli ()

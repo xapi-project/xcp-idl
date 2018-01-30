@@ -32,9 +32,24 @@ let () = Printf.ksprintf Jbuild_plugin.V1.send {|
 (library
  ((name xcp_cluster)
   (public_name xcp.cluster)
-  (modules (:standard))
+  (modules (:standard \ cluster_cli))
   (flags (:standard -w -39 %s))
   (libraries (xcp threads rpclib))
   (wrapped false)
   %s))
+
+(executable
+ ((name cluster_cli)
+  (modules (cluster_cli))
+  (libraries
+   (cmdliner
+    rpclib.cmdliner
+    rpclib.markdown
+    xcp.cluster))))
+
+(alias
+ ((name runtest)
+  (deps (cluster_cli.exe))
+  (action (run ${<}))))
+
 |} (flags rewriters_ppx) coverage_rewriter

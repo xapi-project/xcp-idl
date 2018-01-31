@@ -20,7 +20,7 @@ export BISECT_ENABLE=YES
 jbuilder runtest
 
 # move all bisect files here
-find . -name 'bisect*' -exec mv {} . \;
+find . -name 'bisect*.out' -exec mv {} . \;
 
 DIRECTORIES=`find . -type d`
 printf -v INCLUDES " -I %s" $DIRECTORIES

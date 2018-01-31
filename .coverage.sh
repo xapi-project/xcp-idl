@@ -22,7 +22,7 @@ jbuilder runtest
 # move all bisect files here
 find . -name 'bisect*.out' -exec mv {} . \;
 
-DIRECTORIES=`find . -type d`
+DIRECTORIES=$(find _build/default -type d -not -path '*/\.*')
 printf -v INCLUDES " -I %s" $DIRECTORIES
 
 bisect-ppx-report bisect*.out $INCLUDES -text report

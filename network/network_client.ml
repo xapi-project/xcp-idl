@@ -12,9 +12,6 @@
  * GNU Lesser General Public License for more details.
  *)
 
-open Network_interface
-open Xcp_client
-
 let retry_econnrefused f =
   let rec loop () =
     let result =
@@ -31,9 +28,9 @@ let retry_econnrefused f =
 let rpc call =
   retry_econnrefused
     (fun () ->
-       if !use_switch
-       then json_switch_rpc !queue_name call
-       else xml_http_rpc
+       if !Xcp_client.use_switch
+       then Xcp_client.json_switch_rpc !Network_interface.queue_name call
+       else Xcp_client.xml_http_rpc
            ~srcstr:(Xcp_client.get_user_agent ())
            ~dststr:"network"
            Network_interface.uri

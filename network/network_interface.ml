@@ -58,7 +58,7 @@ module Unix = struct
       rpc_of = (fun t -> Rpc.String (Unix.string_of_inet_addr t));
       of_rpc = (function
           | Rpc.String s -> Ok (Unix.inet_addr_of_string s)
-          | _ -> Error (`Msg "Expecting value of string type when unmarshalling inet_addr"));
+          | r -> Error (`Msg (Printf.sprintf "typ_of_inet_addr: expectd rpc string but got %s" (Rpc.to_string r))));
     })
 end
 
@@ -217,6 +217,7 @@ type errors =
   | Not_implemented (** [Not_implemented] is reported if the interface is not implemented *)
   | Vlan_in_use of (string * int) (** [Vlan_in_use (bridge, vlan_id)] is reported when [vlan_id] on [bridge] is inuse *)
   | PVS_proxy_connection_error (** [PVS_proxy_connection_error] is reported when unable to connect PVS proxy *)
+  | Internal_error of string
   | Unknown_error (** The default variant for forward compatibility. *)
 [@@default Unknown_error]
 [@@deriving rpcty]
@@ -226,7 +227,9 @@ exception Network_error of errors
 let err = Error.{
     def = errors;
     raiser = (function | e -> raise (Network_error e));
-    matcher = function | Network_error e -> Some e | _ -> None
+    matcher = (function
+        | Network_error e -> Some e
+        | e -> Some (Internal_error (Printexc.to_string e)))
   }
 
 (** {2 API functions} *)

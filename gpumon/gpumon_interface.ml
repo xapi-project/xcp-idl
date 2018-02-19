@@ -76,7 +76,7 @@ exception Gpumon_error of gpu_errors
 (** Error handler *)
 let gpu_err = Error.{
     def = gpu_errors;
-    raiser = (function | e -> raise (Gpumon_error e));
+    raiser = (fun e -> raise (Gpumon_error e));
     matcher = (function
         | Gpumon_error e -> Some e
         | e -> Some (Internal_error (Printexc.to_string e)))

@@ -77,7 +77,7 @@ exception MemoryError of errors
 
 let err = Error.{
     def = errors;
-    raiser = (function | e -> raise (MemoryError e));
+    raiser = (fun e -> raise (MemoryError e));
     matcher = (function
         | MemoryError e -> Some e
         | e -> Some (Internal_error (Printexc.to_string e)))

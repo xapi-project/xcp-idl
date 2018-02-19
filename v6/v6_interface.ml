@@ -94,8 +94,7 @@ exception V6_error of errors
 (** handle exception generation and raising *)
 let err = Error.{
     def = errors;
-    raiser = (function
-        | e -> raise (V6_error e));
+    raiser = (fun e -> raise (V6_error e));
     matcher = (function
         | V6_error e -> Some e
         | e -> Some (Internal_error (Printexc.to_string e)))

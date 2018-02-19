@@ -61,6 +61,11 @@ type errors =
   "[Invalid_memory_value (value)] is reported if a memory value passed is not ";
   "valid, e.g. negative."
 ]]
+| Internal_error of (string)
+[@doc [
+  "[Internal_error (value)] is reported if an unexpected error is triggered ";
+  "by the library."
+]]
 | Unknown_error
 [@doc [
   "The default variant for forward compatibility."
@@ -71,10 +76,12 @@ type errors =
 exception MemoryError of errors
 
 let err = Error.{
-  def = errors;
-  raiser = (function | e -> raise (MemoryError e));
-  matcher = function | MemoryError e -> Some e | _ -> None
-}
+    def = errors;
+    raiser = (function | e -> raise (MemoryError e));
+    matcher = (function
+        | MemoryError e -> Some e
+        | e -> Some (Internal_error (Printexc.to_string e)))
+  }
 
 type debug_info = string
 [@@doc ["An uninterpreted string associated with the operation."]]

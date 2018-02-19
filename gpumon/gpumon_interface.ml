@@ -155,9 +155,9 @@ module RPC_API(R : RPC) = struct
       declare "get_vgpu_metadata"
         [ "Obtains metadata for all vGPUs running in a domain." ]
         ( debug_info_p
-         @-> domid_p
-         @-> pgpu_address_p
-         @-> returning nvidia_vgpu_metadata_list_p gpu_err
+          @-> domid_p
+          @-> pgpu_address_p
+          @-> returning nvidia_vgpu_metadata_list_p gpu_err
         )
 
     let get_pgpu_vgpu_compatibility =

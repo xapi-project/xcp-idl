@@ -118,14 +118,17 @@ type dp_stat_t = {
 
 let string_of_dp_stat_t (x: dp_stat_t) = Jsonrpc.to_string (rpc_of_dp_stat_t x)
 
+type device_config = (string * string) list
 type probe = {
-  srs: (string * sr_info) list; (* SRs we found *)
-  uris: string list; (* other uris we found which could be probed recursively *)
+  configuration: (string * string) list;
+  complete: bool;
+  sr: sr_info option;
+  extra_info: (string * string) list;
 }
 
 type probe_result =
   | Raw of string (* SMAPIv1 adapters return arbitrary data *)
-  | Probe of probe
+  | Probe of probe list
 
 module Mirror = struct
 	type id = string

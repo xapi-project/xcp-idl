@@ -206,7 +206,7 @@ end
 type uuid = string
 
 exception Backend_error_with_backtrace of (string * (string list)) (** name * params *)
-
+exception Vdis_on_different_srs of (vdi * vdi)    (** error: VDI.list_changed_blocks requires both VDIs on same SR *)
 exception Sr_not_attached of string               (** error: SR must be attached to access VDIs *)
 exception Vdi_does_not_exist of string            (** error: the VDI is unknown *)
 exception Illegal_transition of (Vdi_automaton.state * Vdi_automaton.state) (** This operation implies an illegal state transition *)

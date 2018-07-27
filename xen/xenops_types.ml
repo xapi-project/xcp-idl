@@ -70,6 +70,7 @@ module Vm = struct
     qemu_disk_cmdline: bool;
     qemu_stubdom: bool;
     firmware: firmware_type option;
+    nvram: (string * string) list option;
   }
   [@@deriving rpc, sexp]
 
@@ -91,6 +92,7 @@ module Vm = struct
     qemu_disk_cmdline = false;
     qemu_stubdom = false;
     firmware = None;
+    nvram = None;
   }
 
   type pv_direct_boot = {

@@ -49,6 +49,11 @@ module Vm = struct
     | IGD_passthrough of igd_passthrough
   [@@deriving rpc, sexp]
 
+  type firmware_type =
+    | Bios
+    | Uefi
+  [@@deriving rpc, sexp]
+
   type hvm_info = {
     hap: bool;
     shadow_multiplier: float;
@@ -64,6 +69,7 @@ module Vm = struct
     boot_order: string;
     qemu_disk_cmdline: bool;
     qemu_stubdom: bool;
+    firmware: firmware_type option;
   }
   [@@deriving rpc, sexp]
 
@@ -84,6 +90,7 @@ module Vm = struct
     boot_order = "";
     qemu_disk_cmdline = false;
     qemu_stubdom = false;
+    firmware = None;
   }
 
   type pv_direct_boot = {

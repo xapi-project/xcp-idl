@@ -37,6 +37,27 @@ module Vgpu = struct
 
 end
 
+module Nvram = struct
+  type onboot =
+    | Persist
+    | Reset
+    [@@deriving rpc, sexp]
+
+  type t = {
+    efi_variables_on_boot: onboot;
+    efi_variables_backend: string;
+  } [@@deriving rpc, sexp]
+
+  let default_t = {
+    efi_variables_on_boot = Persist;
+    efi_variables_backend = "xapidb"
+  }
+
+  let t_of_rpc rpc =
+    Rpc.struct_extend rpc (rpc_of_t default_t) |>
+    t_of_rpc
+end
+
 module Vm = struct
   type igd_passthrough =
     | GVT_d
@@ -54,6 +75,8 @@ module Vm = struct
     | Uefi
   [@@deriving rpc, sexp]
 
+  let default_firmware = Bios
+
   type hvm_info = {
     hap: bool;
     shadow_multiplier: float;
@@ -69,8 +92,8 @@ module Vm = struct
     boot_order: string;
     qemu_disk_cmdline: bool;
     qemu_stubdom: bool;
-    firmware: firmware_type option;
-    nvram: (string * string) list option;
+    firmware: firmware_type;
+    nvram: Nvram.t;
   }
   [@@deriving rpc, sexp]
 
@@ -91,9 +114,13 @@ module Vm = struct
     boot_order = "";
     qemu_disk_cmdline = false;
     qemu_stubdom = false;
-    firmware = None;
-    nvram = None;
+    firmware = default_firmware;
+    nvram = Nvram.default_t;
   }
+
+  let hvm_info_of_rpc rpc =
+    Rpc.struct_extend rpc (rpc_of_hvm_info default_hvm_info) |>
+    hvm_info_of_rpc
 
   type pv_direct_boot = {
     kernel: string;

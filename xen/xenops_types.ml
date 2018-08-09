@@ -37,20 +37,20 @@ module Vgpu = struct
 
 end
 
-module Nvram = struct
+module Nvram_uefi_variables = struct
   type onboot =
     | Persist
     | Reset
     [@@deriving rpc, sexp]
 
   type t = {
-    efi_variables_on_boot: onboot;
-    efi_variables_backend: string;
+    on_boot: onboot;
+    backend: string;
   } [@@deriving rpc, sexp]
 
   let default_t = {
-    efi_variables_on_boot = Persist;
-    efi_variables_backend = "xapidb"
+    on_boot = Persist;
+    backend = "xapidb"
   }
 
   let t_of_rpc rpc =
@@ -72,7 +72,7 @@ module Vm = struct
 
   type firmware_type =
     | Bios
-    | Uefi
+    | Uefi of Nvram_uefi_variables.t
   [@@deriving rpc, sexp]
 
   let default_firmware = Bios
@@ -93,7 +93,6 @@ module Vm = struct
     qemu_disk_cmdline: bool;
     qemu_stubdom: bool;
     firmware: firmware_type;
-    nvram: Nvram.t;
   }
   [@@deriving rpc, sexp]
 
@@ -115,7 +114,6 @@ module Vm = struct
     qemu_disk_cmdline = false;
     qemu_stubdom = false;
     firmware = default_firmware;
-    nvram = Nvram.default_t;
   }
 
   let hvm_info_of_rpc rpc =

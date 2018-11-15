@@ -22,18 +22,6 @@ module D = Debug.Make (struct
   end)
 open D
 
-type rpc_t = Rpc.t
-
-let typ_of_rpc_t =
-  let open Types in
-  Abstract
-    { aname= "Rpc.t"
-    ; test_data= [Null]
-    ; rpc_of= (fun x -> x)
-    ; of_rpc= (fun x -> Ok x) }
-
-
-
 module TypeCombinators = struct
   let option ?name ?(description= []) d =
     let open Rpc.Types in
@@ -324,7 +312,7 @@ module Task = struct
   type state =
     | Pending of float
     | Completed of completion_t
-    | Failed of rpc_t
+    | Failed of Rpc.t
   [@@deriving rpcty]
 
   type t = {

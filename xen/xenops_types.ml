@@ -1,160 +1,131 @@
 open Sexplib.Std
 open Xcp_pci
 
-  type power_state =
-    | Running
-    | Halted
-    | Suspended
-    | Paused
-  [@@deriving sexp, rpcty]
+type power_state = Running | Halted | Suspended | Paused
+[@@deriving sexp, rpcty]
 
-  type disk =
-    | Local of string (** path to a local block device *)
-    | VDI of string   (** typically "SR/VDI" *)
-  [@@deriving sexp, rpcty]
-
+type disk =
+  | Local of string  (** path to a local block device *)
+  | VDI of string  (** typically "SR/VDI" *)
+[@@deriving sexp, rpcty]
 
 module Nvram_uefi_variables = struct
-  type onboot =
-    | Persist
-    | Reset
-  [@@deriving rpcty, sexp]
+  type onboot = Persist | Reset [@@deriving rpcty, sexp]
 
-  type t = {
-    on_boot: onboot [@default Persist];
-    backend: string [@default "xapidb"];
-  } [@@deriving rpcty, sexp]
+  type t =
+    {on_boot: onboot [@default Persist]; backend: string [@default "xapidb"]}
+  [@@deriving rpcty, sexp]
 
   let default_t =
     match Rpcmarshal.unmarshal t.Rpc.Types.ty Rpc.(Dict []) with
     | Ok x -> x
     | Error (`Msg m) ->
-      failwith (Printf.sprintf "Error creating Nvram_uefi_variables.default_t: %s" m)
+        failwith
+          (Printf.sprintf "Error creating Nvram_uefi_variables.default_t: %s" m)
 end
 
 module Vm = struct
-  type igd_passthrough =
-    | GVT_d
-  [@@deriving rpcty, sexp]
+  type igd_passthrough = GVT_d [@@deriving rpcty, sexp]
 
   type video_card =
     | Cirrus
     | Standard_VGA
     | Vgpu
     | IGD_passthrough of igd_passthrough
-  [@@default Cirrus]
+  [@@default Cirrus] [@@deriving rpcty, sexp]
+
+  type firmware_type = Bios | Uefi of Nvram_uefi_variables.t
   [@@deriving rpcty, sexp]
 
-  type firmware_type =
-    | Bios
-    | Uefi of Nvram_uefi_variables.t
+  let[@deriving rpcty] default_firmware = Bios
+
+  type hvm_info =
+    { hap: bool [@default true]
+    ; shadow_multiplier: float [@default 1.0]
+    ; timeoffset: string [@default ""]
+    ; video_mib: int [@default 4]
+    ; video: video_card [@default Cirrus]
+    ; acpi: bool [@default true]
+    ; serial: string option [@default None]
+    ; keymap: string option [@default None]
+    ; vnc_ip: string option [@default None]
+    ; pci_emulations: string list [@default []]
+    ; pci_passthrough: bool [@default false]
+    ; boot_order: string [@default ""]
+    ; qemu_disk_cmdline: bool [@default false]
+    ; qemu_stubdom: bool [@default false]
+    ; firmware: firmware_type [@default default_firmware] }
   [@@deriving rpcty, sexp]
 
-  let default_firmware = Bios [@@deriving rpcty]
-
-  type hvm_info = {
-    hap: bool [@default true];
-    shadow_multiplier: float [@default 1.0];
-    timeoffset: string [@default ""];
-    video_mib: int [@default 4];
-    video: video_card [@default Cirrus];
-    acpi: bool [@default true];
-    serial: string option [@default None];
-    keymap: string option [@default None];
-    vnc_ip: string option [@default None];
-    pci_emulations: string list [@default []];
-    pci_passthrough: bool [@default false];
-    boot_order: string [@default ""];
-    qemu_disk_cmdline: bool [@default false];
-    qemu_stubdom: bool [@default false];
-    firmware: firmware_type [@default default_firmware];
-  }
+  type pv_direct_boot =
+    { kernel: string [@default ""]
+    ; cmdline: string [@default ""]
+    ; ramdisk: string option [@default None] }
   [@@deriving rpcty, sexp]
 
-  type pv_direct_boot = {
-    kernel: string [@default ""];
-    cmdline: string [@default ""];
-    ramdisk: string option [@default None];
-  }
+  type pv_indirect_boot =
+    { bootloader: string [@default ""]
+    ; extra_args: string [@default ""]
+    ; legacy_args: string [@default ""]
+    ; bootloader_args: string [@default ""]
+    ; devices: disk list [@default []] }
   [@@deriving rpcty, sexp]
 
-  type pv_indirect_boot = {
-    bootloader: string [@default ""];
-    extra_args: string [@default ""];
-    legacy_args: string [@default ""];
-    bootloader_args: string [@default ""];
-    devices: disk list [@default []];
-  }
+  type pv_boot = Direct of pv_direct_boot | Indirect of pv_indirect_boot
   [@@deriving rpcty, sexp]
 
-  type pv_boot =
-    | Direct of pv_direct_boot
-    | Indirect of pv_indirect_boot
+  type pv_info =
+    { boot: pv_boot
+    ; framebuffer: bool [@default true]
+    ; framebuffer_ip: string option [@default None]
+    ; vncterm: bool [@default true]
+    ; vncterm_ip: string option [@default None] }
   [@@deriving rpcty, sexp]
 
-  type pv_info = {
-    boot: pv_boot;
-    framebuffer: bool [@default true];
-    framebuffer_ip: string option [@default None];
-    vncterm: bool [@default true];
-    vncterm_ip: string option [@default None];
-  }
-  [@@deriving rpcty, sexp]
-
-  type builder_info =
-    | HVM of hvm_info
-    | PV of pv_info
-    | PVinPVH of pv_info
+  type builder_info = HVM of hvm_info | PV of pv_info | PVinPVH of pv_info
   [@@deriving rpcty, sexp]
 
   type id = string [@@deriving rpcty, sexp]
 
-  type action =
-    | Coredump
-    | Shutdown
-    | Start
-    | Pause
+  type action = Coredump | Shutdown | Start | Pause [@@deriving rpcty, sexp]
+
+  type scheduler_params =
+    { priority: (int * int) option
+    ; (* weight, cap *)
+      affinity: int list list
+    (* vcpu -> pcpu list *) }
   [@@deriving rpcty, sexp]
 
-  type scheduler_params = {
-    priority: (int * int) option; (* weight, cap *)
-    affinity: int list list (* vcpu -> pcpu list *)
-  } [@@deriving rpcty, sexp]
-
-  type t = {
-    id: id;
-    name: string [@default "unnamed"];
-    ssidref: int32;
-    xsdata: (string * string) list;
-    platformdata: (string * string) list;
-    bios_strings: (string * string) list;
-    ty: builder_info;
-    suppress_spurious_page_faults: bool;
-    machine_address_size: int option;
-    memory_static_max: int64;
-    memory_dynamic_max: int64;
-    memory_dynamic_min: int64;
-    vcpu_max: int; (* boot-time maximum *)
-    vcpus: int;    (* ideal number to use *)
-    scheduler_params: scheduler_params;
-    on_crash: action list;
-    on_shutdown: action list;
-    on_reboot: action list;
-    pci_msitranslate: bool;
-    pci_power_mgmt: bool;
-    has_vendor_device: bool [@default false];
-  } [@@deriving rpcty, sexp]
-
-  type console_protocol =
-    | Rfb
-    | Vt100
+  type t =
+    { id: id
+    ; name: string [@default "unnamed"]
+    ; ssidref: int32
+    ; xsdata: (string * string) list
+    ; platformdata: (string * string) list
+    ; bios_strings: (string * string) list
+    ; ty: builder_info
+    ; suppress_spurious_page_faults: bool
+    ; machine_address_size: int option
+    ; memory_static_max: int64
+    ; memory_dynamic_max: int64
+    ; memory_dynamic_min: int64
+    ; vcpu_max: int
+    ; (* boot-time maximum *)
+      vcpus: int
+    ; (* ideal number to use *)
+      scheduler_params: scheduler_params
+    ; on_crash: action list
+    ; on_shutdown: action list
+    ; on_reboot: action list
+    ; pci_msitranslate: bool
+    ; pci_power_mgmt: bool
+    ; has_vendor_device: bool [@default false] }
   [@@deriving rpcty, sexp]
 
-  type console = {
-    protocol: console_protocol;
-    port: int;
-    path: string;
-  } [@@deriving rpcty, sexp]
+  type console_protocol = Rfb | Vt100 [@@deriving rpcty, sexp]
+
+  type console = {protocol: console_protocol; port: int; path: string}
+  [@@deriving rpcty, sexp]
 
   type domain_type =
     | Domain_HVM
@@ -163,27 +134,30 @@ module Vm = struct
     | Domain_undefined
   [@@deriving rpcty, sexp]
 
-  type state = {
-    power_state: power_state;
-    domids: int list;
-    consoles: console list;
-    memory_target: int64;
-    memory_actual: int64;
-    memory_limit: int64;
-    vcpu_target: int; (* actual number of vcpus *)
-    shadow_multiplier_target: float; (* actual setting *)
-    rtc_timeoffset: string;
-    uncooperative_balloon_driver: bool;
-    guest_agent: (string * string) list;
-    xsdata_state: (string * string) list;
-    pv_drivers_detected: bool;
-    last_start_time: float;
-    hvm: bool;
-    nomigrate: bool; (* true: VM must not migrate *)
-    nested_virt: bool; (* true: VM uses nested virtualisation *)
-    domain_type: domain_type;
-  } [@@deriving rpcty, sexp]
-
+  type state =
+    { power_state: power_state
+    ; domids: int list
+    ; consoles: console list
+    ; memory_target: int64
+    ; memory_actual: int64
+    ; memory_limit: int64
+    ; vcpu_target: int
+    ; (* actual number of vcpus *)
+      shadow_multiplier_target: float
+    ; (* actual setting *)
+      rtc_timeoffset: string
+    ; uncooperative_balloon_driver: bool
+    ; guest_agent: (string * string) list
+    ; xsdata_state: (string * string) list
+    ; pv_drivers_detected: bool
+    ; last_start_time: float
+    ; hvm: bool
+    ; nomigrate: bool
+    ; (* true: VM must not migrate *)
+      nested_virt: bool
+    ; (* true: VM uses nested virtualisation *)
+      domain_type: domain_type }
+  [@@deriving rpcty, sexp]
 end
 
 module Task = struct
@@ -205,8 +179,7 @@ module Task = struct
     ; subtasks: (string * state) list
     ; debug_info: (string * string) list
     ; backtrace: string (* An s-expression encoded Backtrace.t *)
-    ; cancellable: bool
-    }
+    ; cancellable: bool }
   [@@deriving rpcty]
 
   type t_list = t list [@@deriving rpcty]
@@ -305,11 +278,10 @@ end
 (* XXX: this code shouldn't care about the vswitch/bridge difference *)
 module Network = struct
   type t =
-    | Local of string            (** Name of a local switch *)
+    | Local of string  (** Name of a local switch *)
     | Remote of string * string  (** Vm.id * switch *)
-    | Sriov of Xcp_pci.address   (** Xcp_pci.address *)
-    [@@default Local "xenbr0"]
-    [@@deriving rpcty]
+    | Sriov of Xcp_pci.address  (** Xcp_pci.address *)
+  [@@default Local "xenbr0"] [@@deriving rpcty]
 
   type ts = t list [@@deriving rpcty]
 end
@@ -388,38 +360,40 @@ module Vif = struct
   [@@deriving rpcty]
 end
 
-
-
 module Vgpu = struct
-    type gvt_g = {
-    physical_pci_address: address option; (* unused; promoted to Vgpu.t *)
-    low_gm_sz: int64;
-    high_gm_sz: int64;
-    fence_sz: int64;
-    monitor_config_file: string option;
-  } [@@deriving sexp, rpcty]
+  type gvt_g =
+    { physical_pci_address: address option
+    ; (* unused; promoted to Vgpu.t *)
+      low_gm_sz: int64
+    ; high_gm_sz: int64
+    ; fence_sz: int64
+    ; monitor_config_file: string option }
+  [@@deriving sexp, rpcty]
 
-  type nvidia = {
-    physical_pci_address: address option; (* unused; promoted to Vgpu.t *)
-    config_file: string;
-  } [@@deriving sexp, rpcty]
+  type nvidia =
+    { physical_pci_address: address option
+    ; (* unused; promoted to Vgpu.t *)
+      config_file: string }
+  [@@deriving sexp, rpcty]
 
-  type mxgpu = {
-    physical_function: address option; (* unused; promoted to Vgpu.t *)
-    vgpus_per_pgpu: int64;
-    framebufferbytes: int64;
-  } [@@deriving sexp, rpcty]
-
+  type mxgpu =
+    { physical_function: address option
+    ; (* unused; promoted to Vgpu.t *)
+      vgpus_per_pgpu: int64
+    ; framebufferbytes: int64 }
+  [@@deriving sexp, rpcty]
 
   type implementation =
     | GVT_g of gvt_g
     | Nvidia of nvidia
     | MxGPU of mxgpu
-    | Empty [@@default Empty] [@@deriving rpcty]
+    | Empty
+  [@@default Empty] [@@deriving rpcty]
 
   type id = string * string [@@deriving rpcty]
 
-	let pci_default = Pci.{domain= 0; bus= 0; dev= 0; fn= 0}
+  let pci_default = Pci.{domain= 0; bus= 0; dev= 0; fn= 0}
+
   type t =
     { id: id [@default "", ""]
     ; position: int [@default 0]
@@ -432,7 +406,7 @@ module Vgpu = struct
     | {implementation= GVT_g {physical_pci_address= Some address; _}; _}
     | {implementation= Nvidia {physical_pci_address= Some address; _}; _}
     | {implementation= MxGPU {physical_function= Some address; _}; _} ->
-      {x with physical_pci_address= address}
+        {x with physical_pci_address= address}
     | _ -> x
 
   type state = {active: bool; plugged: bool; emulator_pid: int option} [@@deriving rpcty]
@@ -459,7 +433,6 @@ module Metadata = struct
     ; domains: string option [@default None] }
   [@@deriving rpcty]
 end
-
 
 module Dynamic = struct
   type id =
@@ -488,20 +461,22 @@ module Dynamic = struct
 end
 
 module DB = struct
-    type t = {
-      task : Task.t Rpc.Refmap.t;
-      host : Host.t Rpc.Refmap.t;
-      vm : Vm.state Rpc.Refmap.t;
-      pci : Pci.state Rpc.Refmap.t;
-      vbd : Vbd.state Rpc.Refmap.t;
-      vusb : Vusb.state Rpc.Refmap.t;
-      vif : Vif.state Rpc.Refmap.t;
-      vgpu : Vgpu.state Rpc.Refmap.t;
-    } [@@deriving rpcty]
+  type t =
+    { task: Task.t Rpc.Refmap.t
+    ; host: Host.t Rpc.Refmap.t
+    ; vm: Vm.state Rpc.Refmap.t
+    ; pci: Pci.state Rpc.Refmap.t
+    ; vbd: Vbd.state Rpc.Refmap.t
+    ; vusb: Vusb.state Rpc.Refmap.t
+    ; vif: Vif.state Rpc.Refmap.t
+    ; vgpu: Vgpu.state Rpc.Refmap.t }
+  [@@deriving rpcty]
 
-   let rels = []
+  let rels = []
 
-   let find_objs : type a. a Rpc.Types.cls -> (a Rpc.Refmap.t, t) Rpc.Types.field = fun cls ->
+  let find_objs : type a.
+      a Rpc.Types.cls -> (a Rpc.Refmap.t, t) Rpc.Types.field =
+   fun cls ->
     match cls with
     | Task.T -> t_task
     | Host.T -> t_host
@@ -513,26 +488,26 @@ module DB = struct
     | Vgpu.STATE -> t_vgpu
     | _ -> failwith "Unknown class"
 
-    let typ_of_cls : type a. a Rpc.Types.cls -> a Rpc.Types.typ = fun cls ->
-      match cls with
-      | Task.T -> Task.typ_of
-      | Host.T -> Host.typ_of
-      | Vm.STATE -> Vm.typ_of_state
-      | Pci.STATE -> Pci.typ_of_state
-      | Vbd.STATE -> Vbd.typ_of_state
-      | Vusb.STATE -> Vusb.typ_of_state
-      | Vif.STATE -> Vif.typ_of_state
-      | Vgpu.STATE -> Vgpu.typ_of_state
-      | _ -> failwith "Unknown cls"
+  let typ_of_cls : type a. a Rpc.Types.cls -> a Rpc.Types.typ =
+   fun cls ->
+    match cls with
+    | Task.T -> Task.typ_of
+    | Host.T -> Host.typ_of
+    | Vm.STATE -> Vm.typ_of_state
+    | Pci.STATE -> Pci.typ_of_state
+    | Vbd.STATE -> Vbd.typ_of_state
+    | Vusb.STATE -> Vusb.typ_of_state
+    | Vif.STATE -> Vif.typ_of_state
+    | Vgpu.STATE -> Vgpu.typ_of_state
+    | _ -> failwith "Unknown cls"
 
-    let empty_db = {
-      task = Refmap.empty;
-      host = Refmap.empty;
-      vm = Refmap.empty;
-      pci = Refmap.empty;
-      vbd = Refmap.empty;
-      vusb = Refmap.empty;
-      vif = Refmap.empty;
-      vgpu = Refmap.empty;
-    }
+  let empty_db =
+    { task= Refmap.empty
+    ; host= Refmap.empty
+    ; vm= Refmap.empty
+    ; pci= Refmap.empty
+    ; vbd= Refmap.empty
+    ; vusb= Refmap.empty
+    ; vif= Refmap.empty
+    ; vgpu= Refmap.empty }
 end

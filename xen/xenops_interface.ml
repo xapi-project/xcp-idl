@@ -695,6 +695,11 @@ module XenopsAPI (R : RPC) = struct
       declare "UPDATES.refresh_vm" []
         (debug_info_p @-> VM.vm_id_p @-> returning unit_p err)
 
+    let inject =
+      let result_p = Param.mk ~name:"gen" Types.int64 in
+      declare "UPDATES.inject" []
+        (debug_info_p @-> returning result_p err)
+
     let get_deltas =
       let result_p =
         Param.mk ~name:"updates"

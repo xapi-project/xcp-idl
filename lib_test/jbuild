@@ -19,6 +19,7 @@ let () = Printf.ksprintf Jbuild_plugin.V1.send {|
     rpclib.markdown
     threads
     xcp
+    xcp.cluster
     xcp.rrd
     xcp.memory
     xcp.updates
@@ -27,6 +28,7 @@ let () = Printf.ksprintf Jbuild_plugin.V1.send {|
     xcp.storage
     xcp.varstore.privileged
     xcp.varstore.deprivileged
+    xcp.v6
     xcp.xen))
   (preprocess (pps (ppx_deriving_rpc %s)))  ))
 

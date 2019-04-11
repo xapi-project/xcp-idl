@@ -15,7 +15,7 @@
  *
  *)
 
-open Xapi_stdext_pervasives.Pervasiveext
+let finally = Stdext.Pervasiveext.finally
 
 let handle_socket f s =
   try

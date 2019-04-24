@@ -29,12 +29,14 @@ module Vgpu = struct
     physical_pci_address : None
     virtual_pci_address : Some 0000:00:0a.0
     type_id: 45
+    uuid: aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
   }
   *)
   type nvidia = {
     physical_pci_address: address option; (* unused; promoted to Vgpu.t *)
     virtual_pci_address: address option;
     type_id: string;
+    uuid: string;
   } [@@deriving sexp, rpcty]
 
   type mxgpu = {

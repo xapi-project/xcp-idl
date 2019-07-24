@@ -24,7 +24,7 @@ let () = Printf.ksprintf Jbuild_plugin.V1.send {|
 )
 
 (library
-  (name xcp)
+  (name xapi_idl)
   (public_name xapi-idl)
   (flags (:standard -w -39 -warn-error -3))
   (modules (:standard \ scheduler task_server updates))
@@ -52,7 +52,7 @@ let () = Printf.ksprintf Jbuild_plugin.V1.send {|
     xapi-inventory
     xmlm
   )
-  (wrapped false)
+  (wrapped (transition "Unwrapped xapi-idl is deprecated. Use Xapi_idl instead and drop the Xcp_ prefix."))
   (preprocess (pps ppx_sexp_conv ppx_deriving_rpc %s))
 )
 

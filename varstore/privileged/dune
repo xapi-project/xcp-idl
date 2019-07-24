@@ -3,7 +3,7 @@
   (public_name xapi-idl.varstore.privileged)
   (modules (:standard \ varstore_privileged_cli))
   (flags (:standard -w -39))
-  (libraries xcp threads rpclib.core)
+  (libraries xapi_idl threads rpclib.core)
   (wrapped false)
   (preprocess (pps ppx_deriving_rpc bisect_ppx -conditional)))
 

@@ -442,7 +442,9 @@ module Host = struct
     ; features_hvm: int64 array
     ; features_pv_host: int64 array
     ; features_hvm_host: int64 array
-    ; features_oldstyle: int64 array }
+    ; features_oldstyle: int64 array
+    ; policy_pv: string
+    ; policy_hvm: string}
   [@@deriving rpcty]
 
   type chipset_info = {iommu: bool; hvm: bool} [@@deriving rpcty]
@@ -546,10 +548,26 @@ module XenopsAPI (R : RPC) = struct
         Host.guest_agent_feature_list
 
     type cpu_features_array = int64 array [@@deriving rpcty]
+    type policy_array = string [@@deriving rpcty]
+
+    let policy_p =
+      Param.mk ~description:["A cpu policy"]
+        ~name:"policy" policy_array
 
     let cpu_features_array_p =
       Param.mk ~description:["An array containing the raw CPU feature flags"]
         ~name:"features_array" cpu_features_array
+
+    type policy_message = (string * bool * string option) [@@deriving rpcty]
+    type policy_boolean = bool [@@deriving rpcty]
+
+    let policy_boolean_p =
+      Param.mk ~description:["A boolean for whether or not two policies are identical"]
+        ~name:"policy_boolean_p" policy_boolean
+
+    let policy_compatibility_p =
+      Param.mk ~description:["The compatibility of two policies"]
+        ~name:"policy_calc_compatible_p" policy_message
 
     let stat =
       declare "HOST.stat" ["Get the state of the host"]
@@ -580,6 +598,26 @@ module XenopsAPI (R : RPC) = struct
       declare "HOST.upgrade_cpu_features" []
         ( debug_info_p @-> cpu_features_array_p @-> is_hvm_p
         @-> returning cpu_features_array_p err )
+
+    let upgrade_cpu_policy =
+      let is_hvm_p = Param.mk ~name:"is_hvm" Types.bool in
+      declare "Host.upgrade_cpu_policy" ["Given an older cpu feature set, return an updated cpu policy"]
+        (
+            debug_info_p @-> policy_p @-> is_hvm_p @-> returning policy_p err
+        )
+
+    let policy_calc_compatible =
+      declare "HOST.policy_calc_compatible" ["Find out if two host policies are compatible with each other, also returns the intersection"]
+        (
+          debug_info_p @-> policy_p @-> policy_p @-> returning policy_compatibility_p err
+        )
+
+    let policy_is_compatible =
+      declare "HOST.policy_is_compatible" ["Find out if a vm policy is compatible with a host policy, also returns the intersection"]
+        (
+          debug_info_p @-> policy_p @-> policy_p @-> returning policy_compatibility_p err
+        )
+
   end
 
   module VM = struct

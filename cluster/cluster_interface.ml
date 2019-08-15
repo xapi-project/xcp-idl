@@ -123,6 +123,10 @@ let debug_info_p = Param.mk ~name:"dbg" ~description:[
                        "An uninterpreted string to associate with the operation."
                      ] debug_info
 
+type force_flag = bool
+  [@@doc ["Force the action"]]
+  [@@deriving rpcty]
+
 type remove = bool [@@deriving rpcty]
 
 module LocalAPI(R:RPC) = struct
@@ -212,4 +216,19 @@ module LocalAPI(R:RPC) = struct
       "diagnostics"
       ["Returns diagnostic information about the cluster"]
       (debug_info_p @-> returning diagnostics_p err)
+
+  let manual_recover =
+    let dead_p = Param.mk ~name:"dead" addresslist in
+    let to_contact_p = Param.mk ~name:"to_contact" addresslist in
+    let force_p = Param.mk ~name:"force" force_flag in
+    let hosts_requiring_toolstack_restart_p =
+      Param.mk ~name:"hosts_requiring_toolstack_restart" addresslist in
+    declare
+      "manual-recover"
+      ["Use this when there is no quorum on start up."]
+      (debug_info_p @->
+       to_contact_p @->
+       dead_p @->
+       force_p @->
+       returning hosts_requiring_toolstack_restart_p err)
 end

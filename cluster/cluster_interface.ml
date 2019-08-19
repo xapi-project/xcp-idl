@@ -75,7 +75,7 @@ type diagnostics = {
   next_cluster_config : cluster_config option; (* next corosync config *)
   saved_cluster_config : cluster_config option; (* xapi-clusterd DB *)
   is_enabled : bool;
-  all_members : all_members option;
+  all_members : all_members [@default []];
   node_id : nodeid option;
   token : string option;
   num_times_booted : int;

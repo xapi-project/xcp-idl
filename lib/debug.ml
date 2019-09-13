@@ -151,17 +151,23 @@ let set_facility f = Mutex.execute facility_m (fun () -> facility := f)
 let get_facility () = Mutex.execute facility_m (fun () -> !facility)
 
 let output_log brand level priority s =
-  if not(is_disabled brand level) then begin
     let msg = format false brand priority s in
     if !print_debug
     then Printf.printf "%s\n%!" (format true brand priority s);
-
     Syslog.log (get_facility ()) level msg
+
+(* CA-326244: This function takes a lock to check if the debug level is disabled,
+   therefore it shouldn't be called from exception hooks, finalizers, etc. that
+   can get invoked from any place in the code, that might result in a deadlock in this module in
+   case it's invoked while we already hold the loglevel_m mutex *)
+let output_log_if_enabled brand level priority s =
+  if not(is_disabled brand level) then begin
+    output_log brand level priority s
   end
 
 let logs_reporter =
   (* We convert Logs level to our own type to allow output_log to correctly
-     filter logs coming from libraries using Logs *)
+     display log levels coming from libraries using Logs *)
   let logs_to_syslog_level = function
     (* In practice we only care about Syslog.Debug,Warning,Info,Err,
        because these are the ones we use in the log functions in Debug.Make *)
@@ -207,9 +213,11 @@ let logs_reporter =
 
 let init_logs () =
   Logs.set_reporter logs_reporter;
-  (* [output_log] will do the actual filtering based on levels,
-     but we only consider messages of level warning and above from libraries,
-     to avoid calling [output_log] too often. *)
+  (* CA-326244: we do not call [output_log_if_enabled] that does filtering based on levels,
+     because that can result in a deadlock in case the Logs library is used in exception hooks,
+     finalizers, etc., because those hooks could be called while we already hold the loglevel_m mutex.
+     Instead we just call [output_log] and display everything at level warning or above,
+     regardless of what is and isn't enabled by this module. *)
   Logs.set_level (Some Logs.Warning)
 
 let rec split_c c str =
@@ -222,8 +230,8 @@ let log_backtrace_exn ?(level=Syslog.Err) ?(msg="error") exn _bt =
   Backtrace.is_important exn;
   let all = split_c '\n' (Backtrace.(to_string_hum (remove exn))) in
   (* Write to the log line at a time *)
-  output_log "backtrace" level msg (Printf.sprintf "Raised %s" (Printexc.to_string exn));
-  List.iter (output_log "backtrace" level msg) all
+  output_log_if_enabled "backtrace" level msg (Printf.sprintf "Raised %s" (Printexc.to_string exn));
+  List.iter (output_log_if_enabled "backtrace" level msg) all
 
 let log_backtrace e bt = log_backtrace_exn e bt
 
@@ -237,7 +245,7 @@ let with_thread_associated task f x =
   | `Error (exn, bt) ->
     (* This function is a top-level exception handler typically used on fresh
        threads. This is the last chance to do something with the backtrace *)
-    output_log "backtrace" Syslog.Err "error" (Printf.sprintf "%s failed with exception %s" task (Printexc.to_string exn));
+    output_log_if_enabled "backtrace" Syslog.Err "error" (Printf.sprintf "%s failed with exception %s" task (Printexc.to_string exn));
     log_backtrace exn bt;
     raise exn
 
@@ -321,7 +329,7 @@ module Make = functor(Brand: BRAND) -> struct
     Printf.kprintf
       (fun s ->
          if not(is_disabled Brand.name level)
-         then output_log Brand.name level priority s
+         then output_log_if_enabled Brand.name level priority s
       ) fmt
 
   let debug fmt = output Syslog.Debug "debug" fmt

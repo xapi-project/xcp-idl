@@ -24,75 +24,44 @@ module Mutex = struct
     r
 end
 
-module Cache = struct
-  type 'a t = {
-    mutable item: 'a option;
-    fn: unit -> 'a;
-    m: Mutex.t;
-  }
-
-  let make fn =
-    let item = None in
-    let m = Mutex.create () in
-    { item; fn; m }
-
-  let invalidate t =
-    Mutex.execute t.m
-      (fun () ->
-         t.item <- None;
-      )
-
-  let get t =
-    Mutex.execute t.m
-      (fun () ->
-         match t.item with
-         | Some x -> x
-         | None ->
-           let x = t.fn () in
-           t.item <- Some x;
-           x
-      )
-end
-
-let hostname = Cache.make
-    (fun () ->
-       let h = Unix.gethostname () in
-       Backtrace.set_my_name (Filename.basename(Sys.argv.(0)) ^ " @ " ^ h);
-       h
-    )
-
-let invalidate_hostname_cache () = Cache.invalidate hostname
+let hostname = ref (Unix.gethostname ())
+let invalidate_hostname_cache () = hostname := Unix.gethostname ()
 
 let get_thread_id () =
   try Thread.id (Thread.self ()) with _ -> -1
 
+module IntMap = Map.Make(struct
+  type t = int
+  let compare = Pervasives.compare
+end)
+
 module ThreadLocalTable = struct
   type 'a t = {
-    tbl: (int, 'a) Hashtbl.t;
+    mutable tbl: 'a IntMap.t;
     m: Mutex.t;
   }
 
   let make () =
-    let tbl = Hashtbl.create 37 in
+    let tbl = IntMap.empty in
     let m = Mutex.create () in
     { tbl; m }
 
   let add t v =
     let id = get_thread_id () in
-    Mutex.execute t.m (fun () -> Hashtbl.add t.tbl id v)
+    Mutex.execute t.m (fun () ->
+      t.tbl <- IntMap.add id v t.tbl)
 
   let remove t =
     let id = get_thread_id () in
-    Mutex.execute t.m (fun () -> Hashtbl.remove t.tbl id)
+    Mutex.execute t.m (fun () ->
+      t.tbl <- IntMap.remove id t.tbl)
 
   let find t =
     let id = get_thread_id () in
-    Mutex.execute t.m (fun () ->
-        try
-          Some (Hashtbl.find t.tbl id)
-        with
-        | _ -> None
-      )
+    try
+      Some (IntMap.find id t.tbl)
+    with
+    | _ -> None
 end
 
 let names = ThreadLocalTable.make ()
@@ -110,7 +79,7 @@ let gettimestring () =
     (int_of_float (1000.0 *. msec))
 
 let format include_time brand priority message =
-  let host = Cache.get hostname in
+  let host = !hostname in
   let id = get_thread_id () in
   let name = match ThreadLocalTable.find names with Some x -> x | None -> "" in
   let task = match ThreadLocalTable.find tasks with Some x -> x | None -> "" in
@@ -148,9 +117,8 @@ let reset_levels () =
 
 
 let facility = ref Syslog.Daemon
-let facility_m = Mutex.create ()
-let set_facility f = Mutex.execute facility_m (fun () -> facility := f)
-let get_facility () = Mutex.execute facility_m (fun () -> !facility)
+let set_facility f = facility := f
+let get_facility () = !facility
 
 let output_log brand level priority s =
   if not(is_disabled brand level) then begin
@@ -254,13 +222,6 @@ let with_thread_named name f x =
     ThreadLocalTable.remove names;
     raise e
 
-module StringSet = Set.Make(struct type t=string let compare=Pervasives.compare end)
-let debug_keys = ref StringSet.empty
-let get_all_debug_keys () =
-  StringSet.fold (fun key keys -> key::keys) !debug_keys []
-
-let dkmutex = Mutex.create ()
-
 module type BRAND = sig
   val name: string
 end
@@ -315,9 +276,6 @@ module type DEBUG = sig
 end
 
 module Make = functor(Brand: BRAND) -> struct
-  let _ =
-    Mutex.execute dkmutex (fun () ->
-        debug_keys := StringSet.add Brand.name !debug_keys)
 
   let output level priority (fmt: ('a, unit, string, 'b) format4) =
     Printf.kprintf

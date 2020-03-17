@@ -443,8 +443,8 @@ module Host = struct
     ; features_pv_host: int64 array
     ; features_hvm_host: int64 array
     ; features_oldstyle: int64 array
-    ; policy_pv: string
-    ; policy_hvm: string}
+    ; policy_pv: policy_array
+    ; policy_hvm: policy_array}
   [@@deriving rpcty]
 
   type chipset_info = {iommu: bool; hvm: bool} [@@deriving rpcty]

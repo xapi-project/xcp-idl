@@ -93,9 +93,15 @@ module ThreadLocalTable = struct
     )
 end
 
-let names = ThreadLocalTable.make ()
 
-let tasks = ThreadLocalTable.make ()
+type task = {
+    desc: string
+  ; client: string option
+}
+
+let tasks: task ThreadLocalTable.t = ThreadLocalTable.make ()
+
+let names: string ThreadLocalTable.t = ThreadLocalTable.make ()
 
 let gettimestring () =
   let time = Unix.gettimeofday () in
@@ -110,9 +116,14 @@ let gettimestring () =
 let format include_time brand priority message =
   let host = Cache.get hostname in
   let id = get_thread_id () in
-  let name = match ThreadLocalTable.find names with Some x -> x | None -> "" in
-  let task = match ThreadLocalTable.find tasks with Some x -> x | None -> "" in
-
+  let task, name =
+    (* if the task's client is known, attach it to the task's name *)
+    let name = match ThreadLocalTable.find names with Some x -> x | None -> "" in
+    match ThreadLocalTable.find tasks with
+    | None -> "", name
+    | Some {desc; client=None} -> desc, name
+    | Some {desc; client=Some client} -> desc, Printf.sprintf "%s->%s" client name
+  in
   Printf.sprintf "[%s%.5s|%s|%d %s|%s|%s] %s"
     (if include_time then gettimestring () else "")
     priority host id name task brand message
@@ -170,8 +181,8 @@ let log_backtrace exn bt =
   output_log "backtrace" Syslog.Err "error" (Printf.sprintf "Raised %s" (Printexc.to_string exn));
   List.iter (output_log "backtrace" Syslog.Err "error") all
 
-let with_thread_associated task f x =
-  ThreadLocalTable.add tasks task;
+let with_thread_associated ?client desc f x =
+  ThreadLocalTable.add tasks {desc; client};
   let result = Backtrace.with_backtraces (fun () -> f x) in
   ThreadLocalTable.remove tasks;
   match result with
@@ -180,7 +191,7 @@ let with_thread_associated task f x =
   | `Error (exn, bt) ->
     (* This function is a top-level exception handler typically used on fresh
        threads. This is the last chance to do something with the backtrace *)
-    output_log "backtrace" Syslog.Err "error" (Printf.sprintf "%s failed with exception %s" task (Printexc.to_string exn));
+    output_log "backtrace" Syslog.Err "error" (Printf.sprintf "%s failed with exception %s" desc (Printexc.to_string exn));
     log_backtrace exn bt;
     raise exn
 

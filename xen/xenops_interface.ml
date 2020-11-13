@@ -436,6 +436,7 @@ module VM = struct
 
 	external export_metadata: debug_info -> Vm.id -> string  = ""
 	external import_metadata: debug_info -> string -> Vm.id  = ""
+	external import_metadata_async: debug_info -> string -> Task.id  = ""
 end
 
 module PCI = struct

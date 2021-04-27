@@ -14,12 +14,26 @@ type debug_info = string [@@deriving rpcty]
 (** Name of the cluster *)
 type cluster_name = string [@@deriving rpcty]
 
-(** An IPv4 address (a.b.c.d) *)
-type address = IPv4 of string [@@deriving rpcty]
+type ip_with_hostname = {ip: string; hostname: string} [@@deriving rpcty]
 
-let printaddr () = function IPv4 s -> Printf.sprintf "IPv4(%s)" s
+(** An cluster member's address
+  * IPv4 should be avoided if possible, but is kept for backwards compatibility *)
+type address = IPv4 of string | IP_with_hostname of ip_with_hostname
+[@@deriving rpcty]
 
-let str_of_address address = match address with IPv4 a -> a
+let printaddr () = function
+  | IPv4 s ->
+      Printf.sprintf "IPv4(%s)" s
+  | IP_with_hostname {ip; hostname} ->
+      Printf.sprintf "IP_with_hostname { ip=%s ; hostname=%s ; } " ip hostname
+
+let str_of_address = function IPv4 a -> a | IP_with_hostname {ip} -> ip
+
+let hostname_of_address = function
+  | IPv4 x ->
+      x
+  | IP_with_hostname {hostname} ->
+      hostname
 
 type addresslist = address list [@@deriving rpcty]
 

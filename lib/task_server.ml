@@ -93,6 +93,7 @@ functor
       ; test_cancel_at: int option  (** index of the cancel point to trigger *)
       ; mutable backtrace: Backtrace.t  (** on error, a backtrace *)
       ; mutable cancellable: bool
+      ; mutable destroy_on_finish: bool
     }
 
     and tasks = {
@@ -149,26 +150,44 @@ functor
             )
         ; backtrace= Backtrace.empty
         ; cancellable= true
+        ; destroy_on_finish= false
         }
       in
       Mutex.execute tasks.m (fun () ->
           tasks.task_map := SMap.add t.id t !(tasks.task_map)) ;
       t
 
+    (* Remove the task from the id -> task mapping. NB any active thread will
+       still continue. *)
+    let destroy task =
+      let tasks = task.tasks in
+      Mutex.execute tasks.m (fun () ->
+          tasks.task_map := SMap.remove task.id !(tasks.task_map)
+      )
+
+    let task_finished item =
+      if item.destroy_on_finish then (
+        debug "Auto-destroying task %s" item.id ;
+        destroy item
+      )
+
     (* [run t] executes the task body, updating the fields of [t] *)
     let run item =
-      try
-        let start = Unix.gettimeofday () in
-        let result = item.f item in
-        let duration = Unix.gettimeofday () -. start in
-        item.state <- Interface.Task.Completed {Interface.Task.duration; result} ;
-        debug "Task %s completed; duration = %.0f" item.id duration
-      with e ->
-        Backtrace.is_important e ;
-        error "Task %s failed; %s" item.id (Printexc.to_string e) ;
-        item.backtrace <- Backtrace.remove e ;
-        let e = e |> Interface.marshal_exn in
-        item.state <- Interface.Task.Failed e
+      ( try
+          let start = Unix.gettimeofday () in
+          let result = item.f item in
+          let duration = Unix.gettimeofday () -. start in
+          item.state <-
+            Interface.Task.Completed {Interface.Task.duration; result} ;
+          debug "Task %s completed; duration = %.0f" item.id duration
+        with e ->
+          Backtrace.is_important e ;
+          error "Task %s failed; %s" item.id (Printexc.to_string e) ;
+          item.backtrace <- Backtrace.remove e ;
+          let e = e |> Interface.marshal_exn in
+          item.state <- Interface.Task.Failed e
+      ) ;
+      task_finished item
 
     let find_locked tasks id =
       try SMap.find id !(tasks.task_map)
@@ -218,13 +237,6 @@ functor
     let list tasks =
       Mutex.execute tasks.m (fun () ->
           SMap.bindings !(tasks.task_map) |> List.map snd)
-
-    (* Remove the task from the id -> task mapping. NB any active thread will
-       still continue. *)
-    let destroy task =
-      let tasks = task.tasks in
-      Mutex.execute tasks.m (fun () ->
-          tasks.task_map := SMap.remove task.id !(tasks.task_map))
 
     let cancel task =
       let callbacks =
@@ -286,5 +298,19 @@ functor
           (* If task is cancelling, just cancel it before setting it to not
              cancellable *)
           check_cancelling_locked task ;
-          task.cancellable <- false)
+          task.cancellable <- false
+      )
+
+    let destroy_on_finish t =
+      t.destroy_on_finish <- true ;
+      let already_finished =
+        Mutex.execute t.tm @@ fun () ->
+        t.destroy_on_finish <- true ;
+        match t.state with
+        | Interface.Task.Pending _ ->
+            false
+        | Interface.Task.Completed _ | Interface.Task.Failed _ ->
+            true
+      in
+      if already_finished then task_finished t
   end

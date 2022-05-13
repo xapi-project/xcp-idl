@@ -162,8 +162,7 @@ functor
     let destroy task =
       let tasks = task.tasks in
       Mutex.execute tasks.m (fun () ->
-          tasks.task_map := SMap.remove task.id !(tasks.task_map)
-      )
+          tasks.task_map := SMap.remove task.id !(tasks.task_map))
 
     let task_finished item =
       if item.destroy_on_finish then (
@@ -298,8 +297,7 @@ functor
           (* If task is cancelling, just cancel it before setting it to not
              cancellable *)
           check_cancelling_locked task ;
-          task.cancellable <- false
-      )
+          task.cancellable <- false)
 
     let destroy_on_finish t =
       t.destroy_on_finish <- true ;

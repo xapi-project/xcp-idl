@@ -160,6 +160,7 @@ module Vm = struct
     ; pci_msitranslate: bool
     ; pci_power_mgmt: bool
     ; has_vendor_device: bool [@default false]
+    ; generation_id: string option
   }
   [@@deriving rpcty, sexp]
 
@@ -194,6 +195,7 @@ module Vm = struct
     ; nomigrate: bool  (** true means VM must not migrate *)
     ; nested_virt: bool  (** true means VM uses nested virtualisation *)
     ; domain_type: domain_type
+    ; featureset: string
   }
   [@@deriving rpcty, sexp]
 end

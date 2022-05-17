@@ -466,7 +466,6 @@ module Host = struct
     ; features_hvm: int64 array
     ; features_pv_host: int64 array
     ; features_hvm_host: int64 array
-    ; features_oldstyle: int64 array
   }
   [@@deriving rpcty]
 
@@ -615,15 +614,6 @@ module XenopsAPI (R : RPC) = struct
     let update_guest_agent_features =
       declare "HOST.update_guest_agent_features" []
         (debug_info_p @-> feature_list_p @-> returning unit_p err)
-
-    let upgrade_cpu_features =
-      let is_hvm_p = Param.mk ~name:"is_hvm" Types.bool in
-      declare "HOST.upgrade_cpu_features" []
-        (debug_info_p
-        @-> cpu_features_array_p
-        @-> is_hvm_p
-        @-> returning cpu_features_array_p err
-        )
   end
 
   module VM = struct

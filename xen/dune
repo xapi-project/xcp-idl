@@ -15,7 +15,7 @@
  (name xcp_xen_interface)
  (public_name xapi-idl.xen.interface)
  (modules xenops_interface)
- (flags (:standard -w -39))
+ (flags (:standard -w -39-27))
  (libraries
    rpclib.core
    threads

@@ -44,6 +44,8 @@
 
 (executable
  (name rrd_cli)
+ (public_name rrd-cli)
+ (package xapi-idl)
  (modules rrd_cli)
  (libraries
    cmdliner

@@ -30,7 +30,7 @@
 (library
  (name xcp_rrd)
  (public_name xapi-idl.rrd)
- (modules (:standard \ data_source rrd_interface rrd_cli))
+ (modules (:standard \ data_source rrd_interface))
  (flags (:standard -w -39))
  (libraries
    rpclib.core
@@ -41,22 +41,4 @@
  )
  (wrapped false)
  (preprocess (pps ppx_deriving_rpc)))
-
-(executable
- (name rrd_cli)
- ; don't install, executable is in xcp-rrdd
- ; (public_name rrd-cli)
- ; (package xapi-idl)
- (modules rrd_cli)
- (libraries
-   cmdliner
-   rpclib.cmdliner
-   rpclib.markdown
-   xapi-idl.rrd
- ))
-
-(rule
- (alias runtest)
- (deps (:x rrd_cli.exe))
- (action (run %{x})))
 
